@@ -1,0 +1,839 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Jev Playground</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+JP:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #111318; --panel: #181b22; --inset: #0d0f13; --line: #2a2f3a;
+    --text: #e6e3da; --muted: #8b909c; --accent: #d4f26a; --err: #ff7a6b;
+    --noul: #6ad4f2; --choice: #f2b56a; --score: #c59af7;
+    --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+    --sans: "IBM Plex Sans JP", system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body { background: var(--bg); color: var(--text); font: 14px/1.6 var(--sans); display: flex; flex-direction: column; }
+  code, pre, textarea, .mono { font-family: var(--mono); }
+  code { color: var(--accent); font-size: 0.92em; }
+  a { color: var(--noul); }
+
+  header { display: flex; align-items: center; gap: 24px; padding: 12px 20px; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+  .brand { margin-right: auto; }
+  .brand h1 { margin: 0; font: 600 18px var(--mono); letter-spacing: -0.02em; }
+  .brand h1 span { color: var(--accent); }
+  .brand p { margin: 0; color: var(--muted); font-size: 12px; }
+  .meter { display: flex; gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+  .meter div { background: var(--panel); padding: 6px 14px; min-width: 104px; }
+  .meter dt { color: var(--muted); font-size: 11px; }
+  .meter dd { margin: 0; font: 500 16px var(--mono); }
+  .meter .cost dd { color: var(--accent); }
+  .meter-note { flex-basis: 100%; margin: -4px 0 0; text-align: right; color: var(--muted); font-size: 11px; }
+
+  main { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .pane { overflow-y: auto; padding: 16px 20px 40px; }
+  .pane + .pane { border-left: 1px solid var(--line); }
+  @media (max-width: 900px) { main { display: block; } .pane + .pane { border-left: 0; border-top: 1px solid var(--line); } }
+
+  h2 { display: flex; align-items: center; gap: 8px; margin: 24px 0 10px; font: 600 13px var(--sans); color: var(--text); }
+  h2:first-child { margin-top: 0; }
+  h2 .step { display: inline-grid; place-items: center; width: 20px; height: 20px; border-radius: 50%; background: var(--accent); color: var(--bg); font: 600 11px var(--mono); }
+  h2 small { color: var(--muted); font-weight: 400; }
+
+  .toolbar { display: flex; gap: 8px; margin-bottom: 8px; }
+  select, button { font: 500 13px var(--sans); color: var(--text); background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 7px 10px; }
+  select { flex: 1; min-width: 0; }
+  button { cursor: pointer; }
+  button:hover { border-color: var(--muted); }
+  button.run { background: var(--accent); border-color: var(--accent); color: var(--bg); font-weight: 600; }
+  button.run:disabled { opacity: 0.5; cursor: wait; }
+  select:focus-visible, button:focus-visible, textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+  textarea { width: 100%; height: 340px; resize: vertical; background: var(--inset); color: var(--text); border: 1px solid var(--line); border-radius: 6px; padding: 12px; font-size: 12.5px; line-height: 1.55; tab-size: 2; }
+  .status { margin: 6px 0 0; font-size: 12px; color: var(--muted); }
+  .status.bad { color: var(--err); }
+
+  pre { margin: 0; background: var(--inset); border: 1px solid var(--line); border-radius: 6px; padding: 12px; font-size: 12px; line-height: 1.55; overflow-x: auto; white-space: pre; }
+  .j-key { color: #9fb4d8; } .j-str { color: #c9d99a; } .j-num { color: var(--choice); } .j-lit { color: var(--score); }
+  .cm { color: var(--muted); }
+
+  .placeholder { color: var(--muted); border: 1px dashed var(--line); border-radius: 6px; padding: 20px; text-align: center; }
+  .error-box { border: 1px solid var(--err); border-radius: 6px; padding: 12px; margin-bottom: 10px; color: var(--err); }
+
+  .answer { border: 1px solid var(--line); border-left: 3px solid var(--c); border-radius: 6px; background: var(--panel); padding: 12px 14px; margin-bottom: 10px; }
+  .answer.noul { --c: var(--noul); } .answer.choice { --c: var(--choice); } .answer.score { --c: var(--score); }
+  .answer-head { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+  .badge { font: 600 10px var(--mono); text-transform: uppercase; letter-spacing: 0.06em; color: var(--c); border: 1px solid var(--c); border-radius: 3px; padding: 0 5px; }
+  .answer-id { font: 500 13px var(--mono); }
+  .answer-value { margin-left: auto; font: 600 18px var(--mono); color: var(--c); }
+  .answer-path { color: var(--muted); font: 11px var(--mono); margin: 2px 0 8px; }
+  .bar-row { display: grid; grid-template-columns: minmax(0, 38%) 1fr 52px; align-items: center; gap: 8px; font-size: 12px; margin-top: 4px; }
+  .bar-row .label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .bar-row.top .label { color: var(--c); font-weight: 600; }
+  .bar { height: 8px; background: var(--inset); border-radius: 2px; overflow: hidden; }
+  .bar i { display: block; height: 100%; background: var(--c); opacity: 0.45; }
+  .bar-row.top .bar i { opacity: 1; }
+  .bar-row .pct { text-align: right; font-family: var(--mono); color: var(--muted); }
+  .confidence { margin-top: 8px; font-size: 12px; color: var(--muted); }
+  .confidence b { color: var(--text); font-family: var(--mono); }
+
+  .endpoint { display: flex; align-items: center; gap: 10px; background: var(--inset); border: 1px solid var(--line); border-radius: 6px; padding: 10px 12px; font: 13px var(--mono); overflow-x: auto; white-space: nowrap; }
+  .endpoint .method { color: var(--bg); background: var(--accent); border-radius: 3px; padding: 0 6px; font-weight: 600; }
+  .note { color: var(--muted); font-size: 12px; margin: 8px 0 0; }
+  .kv { display: grid; grid-template-columns: max-content 1fr; gap: 2px 16px; margin: 10px 0 0; font-size: 12px; }
+  .kv dt { color: var(--muted); } .kv dd { margin: 0; font-family: var(--mono); overflow-wrap: anywhere; }
+  .ok { color: var(--accent); } .ng { color: var(--err); }
+
+  .tabs { display: flex; gap: 2px; margin-bottom: -1px; }
+  .tabs button { border-radius: 6px 6px 0 0; border-bottom-color: transparent; background: transparent; color: var(--muted); padding: 5px 12px; font-size: 12px; }
+  .tabs button[aria-selected="true"] { background: var(--inset); color: var(--text); border-color: var(--line); border-bottom-color: var(--inset); }
+  .tabs + pre { border-top-left-radius: 0; }
+
+  .key-button.unset { border-color: var(--err); color: var(--err); }
+  dialog { background: var(--panel); color: var(--text); border: 1px solid var(--line); border-radius: 8px; padding: 20px; width: min(480px, calc(100vw - 32px)); }
+  dialog::backdrop { background: rgb(0 0 0 / 0.6); }
+  dialog h2 { margin-top: 0; }
+  dialog input { width: 100%; font: 13px var(--mono); color: var(--text); background: var(--inset); border: 1px solid var(--line); border-radius: 6px; padding: 8px 10px; }
+  dialog input:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+  #guide { width: min(680px, calc(100vw - 32px)); }
+  #guide h3 { margin: 16px 0 4px; font: 600 12px var(--sans); color: var(--accent); }
+  #guide p, #guide ul { margin: 0; }
+  #guide ul { padding-left: 1.2em; }
+  #guide li + li { margin-top: 2px; }
+  dialog .actions { display: flex; gap: 8px; margin-top: 16px; }
+  dialog .actions .spacer { flex: 1; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  th, td { text-align: left; padding: 5px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { color: var(--muted); font-weight: 500; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <h1><span>Jev</span> Playground</h1>
+    <p>TypeSafe System One API — state と型付きの質問を送り、構造化された回答を受け取る</p>
+  </div>
+  <button id="open-settings" class="key-button" type="button"></button>
+  <dl class="meter" aria-label="このページを開いてからの利用量">
+    <div><dt>リクエスト</dt><dd id="m-requests">0</dd></div>
+    <div><dt>input tokens</dt><dd id="m-input">0</dd></div>
+    <div><dt>output tokens（無料）</dt><dd id="m-output">0</dd></div>
+    <div class="cost"><dt>推定コスト</dt><dd id="m-cost">$0.000000</dd></div>
+  </dl>
+  <p class="meter-note">ページを開いてからの累計。コスト取得 API は無いため、レスポンスの <code>usage.input_tokens</code> × $0.042 / 100万トークン（jev-1.13 の公開単価）で算出</p>
+</header>
+
+<main>
+  <section class="pane">
+    <h2><span class="step">1</span>入力 <small>リクエストボディ（JSON）をそのまま編集</small></h2>
+    <div class="toolbar">
+      <select id="sample" aria-label="サンプル"></select>
+      <button id="open-guide" type="button">解説</button>
+      <button id="format" type="button">整形</button>
+      <button id="run" class="run" type="button">送信 ⌘↵</button>
+    </div>
+    <textarea id="editor" spellcheck="false" aria-label="リクエストボディ"></textarea>
+    <p id="status" class="status"></p>
+
+    <h2><span class="step">3</span>結果 <small>質問 id ごとに型付きの回答が返る</small></h2>
+    <div id="result"><div class="placeholder">「送信」を押すと、ここに回答が表示されます</div></div>
+  </section>
+
+  <section class="pane">
+    <h2><span class="step">2</span>API 呼び出し <small>エンドポイントは 1 本だけ</small></h2>
+    <div class="endpoint"><span class="method">POST</span>https://api.typesafe.ai/v1/systemone</div>
+    <pre style="margin-top:8px">Authorization: Bearer <span id="key-mask"></span>
+Content-Type: application/json</pre>
+    <p class="note">API はブラウザからの直接呼び出しを CORS で拒否するため、このデモは <code>server.js</code> の <code>/api/systemone</code> を経由します。プロキシは「設定」で入力した API キーの <code>Authorization</code> ヘッダをそのまま転送するだけで、キーを保持しません。</p>
+    <dl class="kv" id="last-call"><dt>直近の呼び出し</dt><dd>—</dd></dl>
+
+    <h2>送信コード <small>左の JSON に連動</small></h2>
+    <div class="tabs" role="tablist" id="code-tabs"></div>
+    <pre id="code"></pre>
+
+    <h2>JSON の形</h2>
+    <pre id="schema"></pre>
+
+    <h2>エラー</h2>
+    <table>
+      <tr><th>Status</th><th>意味</th></tr>
+      <tr><td class="mono">401</td><td>API キーが無い / 不正</td></tr>
+      <tr><td class="mono">422</td><td>ボディの検証エラー。レスポンスに問題のフィールドが載る（サンプル「エラー例」で確認可）</td></tr>
+      <tr><td class="mono">429</td><td>レート制限超過。指数バックオフで再試行（SDK は自動）</td></tr>
+      <tr><td class="mono">529</td><td>一時的な過負荷。少し待って再試行</td></tr>
+    </table>
+
+    <h2>モデル <small><code>GET /v1/models</code></small></h2>
+    <div id="models" class="note">読み込み中…</div>
+    <dl class="kv">
+      <dt>料金</dt><dd>$0.042 / 100万 input tokens（output は無料）</dd>
+      <dt>レート制限</dt><dd>250,000 tokens/秒 · 1,200 requests/分（変動あり）</dd>
+      <dt>コンテキスト</dt><dd>1 リクエスト 64k tokens · state + 最長の質問で 32k</dd>
+      <dt>入力</dt><dd>テキストのみ。英語が最も高精度、日本語は対応するが精度は劣る</dd>
+    </dl>
+    <p class="note">出典: <a href="https://docs.typesafe.ai/api" target="_blank" rel="noopener">API reference</a> · <a href="https://docs.typesafe.ai/models" target="_blank" rel="noopener">Models</a></p>
+  </section>
+</main>
+
+<dialog id="guide">
+  <div id="guide-body"></div>
+  <form method="dialog" class="actions"><span class="spacer"></span><button type="submit">閉じる</button></form>
+</dialog>
+
+<dialog id="settings">
+  <form method="dialog" id="settings-form">
+    <h2>設定 — API キー</h2>
+    <input id="key-input" type="password" autocomplete="off" spellcheck="false" placeholder="TypeSafe API キー" aria-label="TypeSafe API キー">
+    <p class="note">キーは <a href="https://console.typesafe.ai/keys" target="_blank" rel="noopener">console.typesafe.ai/keys</a> で発行できます。このブラウザの localStorage にだけ保存され、API 呼び出しのたびに <code>Authorization</code> ヘッダとしてこのデモのプロキシ経由で TypeSafe に送られます。プロキシはキーを保存・記録しません。</p>
+    <div class="actions">
+      <button id="key-delete" type="button">削除</button>
+      <span class="spacer"></span>
+      <button type="button" id="key-cancel">キャンセル</button>
+      <button class="run" type="submit">保存</button>
+    </div>
+  </form>
+</dialog>
+
+<script>
+// jev-1.13 list price from docs.typesafe.ai/models. Input tokens only; output tokens are free.
+const PRICE_PER_MTOK_USD = 0.042;
+const API_URL = "https://api.typesafe.ai/v1/systemone";
+
+const TICKET = "Hi, I've been trying to connect my Stripe account for 3 days and the integration keeps failing. I'm losing sales. Please help ASAP.";
+
+const SAMPLES = [
+  {
+    label: "サポートチケット — Choice / Score / Noul を 1 回で",
+    guide: {
+      purpose: "問い合わせ 1 件を「どの部署に回すか」「どれくらい怒っているか」「急ぎか」の 3 観点で同時に判定する、もっとも典型的な使い方です。",
+      send: [
+        "`state`: 問い合わせ本文（文字列）",
+        "`department`（choice）: 3 つの部署と、それぞれが何を扱うかの説明",
+        "`frustration`（score）: 冷静〜激怒の 3 段階を順番に並べたルーブリック",
+        "`is_urgent`（noul）: 「緊急性を伝えている」という、はい/いいえで判定できる文",
+      ],
+      returns: [
+        "`department.choice`: 選ばれた部署。`probabilities` に全部署の確率、`confidence` に確信度",
+        "`frustration.score`: 0〜2 の位置（確率加重なので小数になりうる）",
+        "`is_urgent.noul`: 「はい」である確率（0〜1）",
+      ],
+      usage: "質問は同じ state に対して並列かつ独立に評価されるので、質問を増やしても応答時間はほぼ変わりません。コード側では choice を分岐に、score をしきい値に、noul を if 文にそのまま使います。",
+      source: "Quick start の例そのまま",
+    },
+    body: {
+      state: TICKET,
+      model: "jev-latest",
+      questions: {
+        department: {
+          type: "choice",
+          instructions: "Which team should handle this",
+          criteria: {
+            billing: "Payment or subscription issues",
+            technical: "Bugs or integration problems",
+            sales: "Pricing or account questions",
+          },
+        },
+        frustration: {
+          type: "score",
+          instructions: "How frustrated the customer appears",
+          criteria: ["Calm, just stating facts", "Frustrated but civil", "Very angry, strong language"],
+        },
+        is_urgent: { type: "noul", instructions: "The message conveys urgency or time-sensitivity" },
+      },
+    },
+  },
+  {
+    label: "Noul — はい/いいえの確率（criteria 付き）",
+    guide: {
+      purpose: "はい/いいえで答えられる 1 つの問いについて「はいである確率」を得ます。個人情報を含むか、返金を求めているか、といったフラグ判定向けです。",
+      send: [
+        "`instructions`: はい/いいえで答えられる問い（または真偽を判定できる文）",
+        "`criteria`（任意）: `true` と `false` がそれぞれ何を意味するかの補足。境界が曖昧なときに書く",
+      ],
+      returns: [
+        "`noul`: 0（いいえ）〜1（はい）の確率。0.5 付近は「どちらとも言えない」",
+        "Noul には `confidence` はありません（確率そのものが確からしさ）",
+      ],
+      usage: "`if (noul > 0.8)` のように、しきい値を自分で決めて分岐します。「程度」を測りたい場合は Noul ではなく Score を使います。",
+      source: "API reference の例そのまま",
+    },
+    body: {
+      state: "Help! My payouts have been failing for 3 days.",
+      model: "jev-latest",
+      questions: {
+        is_urgent: {
+          type: "noul",
+          instructions: "Does this convey urgency?",
+          criteria: { true: "Explicitly time-sensitive", false: "No urgency expressed" },
+        },
+      },
+    },
+  },
+  {
+    label: "Choice — 選択肢から 1 つ（説明なしは null）",
+    guide: {
+      purpose: "順序のない既知の選択肢から 1 つを選ぶ分類です。チケットの振り分け、文書種別の判定、意図の分類などに使います。",
+      send: [
+        "`state`: ここではオブジェクト（`document` フィールドに本文）",
+        "`criteria`: 「選択肢名: 説明」のマップ。ラベル名だけで意味が明らかなら説明は `null` でよい（最大 255 個）",
+        "想定外の入力がありうるなら `other` のような受け皿の選択肢を入れておく",
+      ],
+      returns: [
+        "`choice`: もっとも確率の高い選択肢",
+        "`probabilities`: 全選択肢の確率（合計 1）。必ず自分が渡した選択肢の中から返る",
+        "`confidence`: 確率分布がどれだけ 1 つに偏っているか（0〜1）",
+      ],
+      usage: "`choice` でコードを分岐し、`confidence` が低いときは自動処理せず人に回す、という使い分けが基本です（ドキュメントの Confidence-gated routing パターン）。",
+      source: "JavaScript SDK Quickstart の例を JSON にしたもの",
+    },
+    body: {
+      state: { document: "I was charged twice. Please fix this ASAP." },
+      model: "jev-latest",
+      questions: {
+        category: {
+          type: "choice",
+          instructions: "What is this ticket about?",
+          criteria: { billing: null, technical: null, other: null },
+        },
+      },
+    },
+  },
+  {
+    label: "Score — 順序つきルーブリックで採点",
+    guide: {
+      purpose: "深刻度・不満度・スキルレベルのような「程度」を、自分で定義した段階の上で測ります。",
+      send: [
+        "`instructions`: 何を測るか",
+        "`criteria`: 段階の説明を低い順に並べた配列（2〜10 個）。配列の位置 0, 1, 2… がそのままスコアになる",
+      ],
+      returns: [
+        "`score`: 確率加重の位置。1.05 のように段階の間に落ちることがある",
+        "`legend`: 段階番号と説明の対応。`probabilities`: 段階ごとの確率",
+        "`confidence`: 確信度（0〜1）",
+      ],
+      usage: "しきい値での分岐や並べ替えに使います。複雑な評価は観点ごとに Score を分けて 1 リクエストで聞き、重み付けはコード側で行います（Composite scoring パターン）。",
+      source: "API reference の例そのまま",
+    },
+    body: {
+      state: "Help! My payouts have been failing for 3 days.",
+      model: "jev-latest",
+      questions: {
+        frustration: {
+          type: "score",
+          instructions: "How frustrated is the customer?",
+          criteria: ["Calm", "Frustrated", "Very angry"],
+        },
+      },
+    },
+  },
+  {
+    label: "構造化 state — 会話・注文・ポリシーを 1 つの state に",
+    guide: {
+      purpose: "会話ログ・注文レコード・社内ポリシーのように、判断に必要な材料をまとめて 1 つの state として渡し、それらを突き合わせる判断をさせます。",
+      send: [
+        "`state`: 名前付きフィールドを持つオブジェクト（`ticket` / `order` / `refund_policy`）",
+        "`instructions` の中でバッククォート付きのフィールド名（例: `refund_policy`）を書くと、state の特定の部分を指して質問できる",
+        "事実は state に、判断したいことは questions に、と分けるのが基本",
+      ],
+      returns: [
+        "`refund_requested.noul` と `policy_supports_refund.noul`: それぞれ独立した確率",
+        "`next_action.choice`: 次に取るべき対応",
+      ],
+      usage: "「返金要求あり、かつポリシー上も可なら自動返金」のように、複数の回答をコード側で組み合わせて業務ルールにします。質問同士は互いの回答を見ません。",
+      source: "state は State ページの例そのまま、questions はこのデモ用に作成",
+    },
+    body: {
+      state: {
+        ticket: {
+          subject: "Duplicate charge",
+          messages: [
+            { from: "customer", text: "I was charged twice for order A-104. Please refund the duplicate." },
+            { from: "support", text: "We are checking the charges." },
+          ],
+        },
+        order: {
+          id: "A-104",
+          charges: [
+            { amount_usd: 49, status: "captured" },
+            { amount_usd: 49, status: "captured" },
+          ],
+        },
+        refund_policy: "Duplicate charges are eligible for a refund.",
+      },
+      model: "jev-latest",
+      questions: {
+        refund_requested: { type: "noul", instructions: "Did the customer request a refund?" },
+        policy_supports_refund: { type: "noul", instructions: "Does `refund_policy` support refunding the charges in `order`?" },
+        next_action: {
+          type: "choice",
+          instructions: "What should support do next?",
+          criteria: {
+            refund: "Issue the refund now",
+            ask_for_details: "More information is needed from the customer",
+            escalate: "Needs a human specialist",
+          },
+        },
+      },
+    },
+  },
+  {
+    label: "構造化 instructions — 質問側に参照データを持たせる",
+    guide: {
+      purpose: "質問ごとに違う参照データと照合したいとき（重複レコードの判定など）に使います。評価対象は state に、比較相手は質問側に持たせます。",
+      send: [
+        "`state`: 評価対象の履歴書",
+        "`instructions`: 文字列ではなくオブジェクト。`question` フィールドに問いを、`potential_duplicate` フィールドに比較相手のデータを入れ、問いの中からバッククォートで参照する",
+      ],
+      returns: ["`is_duplicate.noul`: 同一人物である確率"],
+      usage: "候補が複数あるなら、候補ごとに質問を 1 つずつ作って 1 リクエストにまとめ、noul が最大の候補を採用する、といった使い方ができます。`criteria` の各値も同じようにオブジェクトや配列で書けます。",
+      source: "instructions は API reference の例そのまま、state（履歴書）はこのデモ用に作成",
+    },
+    body: {
+      state: {
+        resume: {
+          name: "Jonathan Smith",
+          location: "Oakland, CA",
+          experience: [
+            { employer: "Google", title: "Software Engineer", years: "2019-2024" },
+            { employer: "Stripe", title: "Software Engineer", years: "2016-2019" },
+          ],
+        },
+      },
+      model: "jev-latest",
+      questions: {
+        is_duplicate: {
+          type: "noul",
+          instructions: {
+            potential_duplicate: { name: "John Smith", location: "Oakland, California", last_employer: "Google" },
+            question: "Is the resume for the same person as `potential_duplicate`?",
+          },
+        },
+      },
+    },
+  },
+  {
+    label: "日本語テキスト — 対応はするが精度は英語より劣る",
+    guide: {
+      purpose: "日本語の問い合わせに対して、振り分け・緊急度・返金要求の 3 つを同時に判定します。日本語でどの程度使えるかを試すためのサンプルです。",
+      send: [
+        "`state`・`instructions`・`criteria` をすべて日本語で記述",
+        "選択肢のキー（`shipping` など）はコードで扱う値なので英語のままにしている",
+      ],
+      returns: ["`category.choice`、`urgency.score`、`wants_refund.noul`（形は英語のときと同じ）"],
+      usage: "ドキュメントによると Jev の主な学習言語は英語で、日本語を含む CJK は受け付けるものの精度は劣ります。本番で使う前に自分のデータで検証し、`confidence` が低い回答は人に回す設計が勧められています。",
+      source: "このデモ用に作成",
+    },
+    body: {
+      state: "先週注文した商品がまだ届きません。追跡番号を見ても3日前から動いていないようです。明日のイベントで使う予定なので、今日中に状況を教えてください。",
+      model: "jev-latest",
+      questions: {
+        category: {
+          type: "choice",
+          instructions: "この問い合わせはどの担当に回すべきか",
+          criteria: {
+            shipping: "配送の遅延・紛失・追跡に関する問い合わせ",
+            payment: "支払い・請求・返金に関する問い合わせ",
+            product: "商品の不具合や使い方に関する問い合わせ",
+          },
+        },
+        urgency: {
+          type: "score",
+          instructions: "対応の緊急度",
+          criteria: ["急ぎではない", "数日以内の対応が望ましい", "当日中の対応が必要"],
+        },
+        wants_refund: { type: "noul", instructions: "顧客は返金を求めている" },
+      },
+    },
+  },
+  {
+    label: "エラー例 — criteria の無い Choice（422 を確認）",
+    guide: {
+      purpose: "リクエストの形を間違えたときに API が何を返すかを確認するためのサンプルです。",
+      send: ["`type` が `choice` なのに、必須の `criteria` を省略している"],
+      returns: [
+        "API reference によれば HTTP 422 が返り、ボディに問題のあったフィールドが示される",
+        "エラー時は `usage` が返らないので、このページのコスト集計には加算されない",
+      ],
+      usage: "422 はリクエスト側のバグなので再試行しても直りません。再試行すべきなのは 429（レート制限）と 529（過負荷）で、指数バックオフを使います（SDK は自動で行います）。",
+      source: "このデモ用に作成",
+    },
+    body: {
+      state: "Help! My payouts have been failing for 3 days.",
+      model: "jev-latest",
+      questions: { department: { type: "choice", instructions: "Which team should handle this?" } },
+    },
+  },
+];
+
+const SCHEMA = `<span class="cm">// ── Request ─────────────────────────────────────────</span>
+{
+  state:     string | object | array,   <span class="cm">// 評価対象。必須</span>
+  model:     "jev-latest",              <span class="cm">// 必須。エイリアスか "jev-1.13.0" 等の固定 ID</span>
+  questions: { [id]: Question }         <span class="cm">// id は自由に命名。同じ id で回答が返る</span>
+}
+
+Question =
+  | { type: "noul",   instructions, criteria?: { true?, false? } }
+  | { type: "choice", instructions, criteria: { [option]: 説明 | null } }  <span class="cm">// 最大 255 個</span>
+  | { type: "score",  instructions, criteria: [レベル説明, ...] }          <span class="cm">// 順序つき 2〜10 個</span>
+<span class="cm">// instructions と criteria の各値は string | object | array。
+// object にすると質問文と参照データを分けられ、\`field\` で名前参照できる</span>
+
+<span class="cm">// ── Response ────────────────────────────────────────</span>
+{
+  model:   "jev-1.13.0",                <span class="cm">// 実際に回答したバージョン</span>
+  answers: { [id]: Answer },
+  usage:   { input_tokens, output_tokens }
+}
+
+Answer =
+  | { type: "noul",   noul }                                        <span class="cm">// 0(no)〜1(yes)</span>
+  | { type: "choice", choice, probabilities: { [option]: p }, confidence }
+  | { type: "score",  score, legend: { "0": 説明, ... },
+                      probabilities: { "0": p, ... }, confidence }  <span class="cm">// score は確率加重で小数になる</span>`;
+
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s).replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
+const pct = (p) => `${(p * 100).toFixed(1)}%`;
+const usd = (tokens) => `$${((tokens * PRICE_PER_MTOK_USD) / 1e6).toFixed(6)}`;
+
+function highlightJson(value) {
+  return esc(JSON.stringify(value, null, 2)).replace(
+    /(&#34;(?:\\.|(?!&#34;).)*&#34;)(\s*:)?|\b(true|false|null)\b|(-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?)/g,
+    (m, str, colon, lit, num) =>
+      str ? `<span class="${colon ? "j-key" : "j-str"}">${str}</span>${colon || ""}`
+      : lit ? `<span class="j-lit">${lit}</span>`
+      : `<span class="j-num">${num}</span>`
+  );
+}
+
+// ---------- API キー ----------
+
+const KEY_STORAGE = "typesafe_api_key";
+const getKey = () => localStorage.getItem(KEY_STORAGE) || "";
+const authHeaders = () => ({ Authorization: `Bearer ${getKey()}`, "Content-Type": "application/json" });
+
+function renderKeyState() {
+  const key = getKey();
+  const masked = key ? `••••${key.slice(-4)}` : "";
+  const button = $("open-settings");
+  button.textContent = key ? `⚙ API キー ${masked}` : "⚙ API キーを設定";
+  button.classList.toggle("unset", !key);
+  $("key-mask").textContent = masked || "<未設定>";
+}
+
+function openSettings() {
+  $("key-input").value = getKey();
+  $("settings").showModal();
+}
+
+function saveKey(value) {
+  if (value) localStorage.setItem(KEY_STORAGE, value);
+  else localStorage.removeItem(KEY_STORAGE);
+  renderKeyState();
+  loadModels();
+}
+
+$("open-settings").addEventListener("click", openSettings);
+$("key-cancel").addEventListener("click", () => $("settings").close());
+$("key-delete").addEventListener("click", () => { saveKey(""); $("settings").close(); });
+$("settings-form").addEventListener("submit", () => saveKey($("key-input").value.trim()));
+
+// ---------- 送信コード ----------
+
+function pyLiteral(value, indent = "") {
+  const next = indent + "    ";
+  if (value === null) return "None";
+  if (typeof value === "boolean") return value ? "True" : "False";
+  if (typeof value !== "object") return JSON.stringify(value);
+  const isArray = Array.isArray(value);
+  const items = isArray
+    ? value.map((v) => next + pyLiteral(v, next))
+    : Object.entries(value).map(([k, v]) => `${next}${JSON.stringify(k)}: ${pyLiteral(v, next)}`);
+  if (!items.length) return isArray ? "[]" : "{}";
+  return `${isArray ? "[" : "{"}\n${items.join(",\n")},\n${indent}${isArray ? "]" : "}"}`;
+}
+
+const CODE_TABS = {
+  curl: (body) => `curl -X POST ${API_URL} \\
+  -H "Authorization: Bearer $TYPESAFE_API_KEY" \\
+  -H "Content-Type: application/json" \\
+  -d @- <<'EOF'
+${JSON.stringify(body, null, 2)}
+EOF`,
+
+  fetch: (body) => `// サーバ側（Node 等）で実行。ブラウザからの直接呼び出しは CORS で拒否される
+const body = ${JSON.stringify(body, null, 2)};
+
+const res = await fetch("${API_URL}", {
+  method: "POST",
+  headers: {
+    Authorization: \`Bearer \${process.env.TYPESAFE_API_KEY}\`,
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify(body),
+});
+if (!res.ok) throw new Error(\`\${res.status}: \${await res.text()}\`);
+
+const { model, answers, usage } = await res.json();`,
+
+  "JS SDK": (body) => `// npm install @typesafe-ai/sdk   (Node.js 20+)
+import { TypeSafeClient } from "@typesafe-ai/sdk";
+
+const client = new TypeSafeClient(); // 環境変数 TYPESAFE_API_KEY を読む
+const response = await client.systemOne(${JSON.stringify(body, null, 2)});
+
+console.log(response.answers, response.usage);
+// questions は choice(instructions, criteria) / score(...) / noul(...) ヘルパーでも書け、
+// 回答の型が質問から推論される`,
+
+  "Python SDK": (body) => `# pip install typesafe-sdk   (Python 3.10+)
+from typesafe_sdk import TypeSafeClient
+
+client = TypeSafeClient()  # 環境変数 TYPESAFE_API_KEY を読む
+response = client.system_one(
+    state=${pyLiteral(body.state, "    ")},
+    questions=${pyLiteral(body.questions, "    ")},
+    model=${pyLiteral(body.model)},
+)
+
+print(response.answers, response.usage)
+# questions は Choice(...) / Score(...) / Noul(...) オブジェクトでも書ける`,
+
+  "このデモ": () => `// ① ブラウザ (index.html) → ローカルプロキシ
+const res = await fetch("/api/systemone", {
+  method: "POST",
+  headers: {
+    Authorization: \`Bearer \${apiKey}\`, // 「設定」で入力したキー (localStorage)
+    "Content-Type": "application/json",
+  },
+  body: editor.value, // 左の JSON をそのまま送る
+});
+
+// ② プロキシ (server.js) → TypeSafe API。Authorization はそのまま転送
+const upstream = await fetch("${API_URL}", {
+  method: "POST",
+  headers: {
+    Authorization: req.headers.authorization,
+    "Content-Type": "application/json",
+  },
+  body,
+});
+// ③ ステータスとボディは加工せずブラウザへ返す`,
+};
+
+let activeTab = "curl";
+let lastValidBody = SAMPLES[0].body;
+
+function renderCode() {
+  $("code-tabs").innerHTML = Object.keys(CODE_TABS)
+    .map((name) => `<button type="button" role="tab" aria-selected="${name === activeTab}" data-tab="${esc(name)}">${esc(name)}</button>`)
+    .join("");
+  $("code").textContent = CODE_TABS[activeTab](lastValidBody);
+}
+
+$("code-tabs").addEventListener("click", (e) => {
+  const tab = e.target.closest("[data-tab]");
+  if (!tab) return;
+  activeTab = tab.dataset.tab;
+  renderCode();
+});
+
+// ---------- 入力 ----------
+
+const editor = $("editor");
+
+function validate() {
+  const status = $("status");
+  try {
+    const body = JSON.parse(editor.value);
+    lastValidBody = body;
+    const types = Object.values(body?.questions ?? {}).map((q) => q?.type ?? "?");
+    const counts = ["choice", "score", "noul"].map((t) => `${t} ${types.filter((x) => x === t).length}`).join(" / ");
+    status.className = "status";
+    status.textContent = `有効な JSON · questions ${types.length} 件（${counts}）`;
+    renderCode();
+    return true;
+  } catch (err) {
+    status.className = "status bad";
+    status.textContent = `JSON エラー: ${err.message}`;
+    return false;
+  }
+}
+
+function loadSample(index) {
+  editor.value = JSON.stringify(SAMPLES[index].body, null, 2);
+  validate();
+}
+
+const richText = (text) => esc(text).replace(/`([^`]+)`/g, "<code>$1</code>");
+
+function openGuide() {
+  const { label, guide } = SAMPLES[Number($("sample").value)];
+  const list = (items) => `<ul>${items.map((item) => `<li>${richText(item)}</li>`).join("")}</ul>`;
+  $("guide-body").innerHTML = `
+    <h2>${esc(label)}</h2>
+    <h3>想定している用途</h3><p>${richText(guide.purpose)}</p>
+    <h3>指定しているもの</h3>${list(guide.send)}
+    <h3>返ってくるもの</h3>${list(guide.returns)}
+    <h3>コード側での使い方</h3><p>${richText(guide.usage)}</p>
+    <p class="note">サンプルの出典: ${richText(guide.source)}</p>`;
+  $("guide").showModal();
+}
+
+$("open-guide").addEventListener("click", openGuide);
+$("guide").addEventListener("click", (e) => { if (e.target === $("guide")) $("guide").close(); });
+
+$("sample").innerHTML = SAMPLES.map((s, i) => `<option value="${i}">${esc(s.label)}</option>`).join("");
+$("sample").addEventListener("change", (e) => loadSample(Number(e.target.value)));
+$("format").addEventListener("click", () => {
+  if (validate()) editor.value = JSON.stringify(lastValidBody, null, 2);
+});
+editor.addEventListener("input", validate);
+editor.addEventListener("keydown", (e) => {
+  if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) run();
+});
+
+// ---------- 結果 ----------
+
+function bars(entries, topKey) {
+  return entries
+    .map(([key, label, p]) => `
+      <div class="bar-row ${key === topKey ? "top" : ""}">
+        <span class="label" title="${esc(label)}">${esc(label)}</span>
+        <span class="bar"><i style="width:${Math.max(0, Math.min(1, p)) * 100}%"></i></span>
+        <span class="pct">${pct(p)}</span>
+      </div>`)
+    .join("");
+}
+
+function renderAnswer(id, a) {
+  let value = "";
+  let field = a.type;
+  let detail = "";
+  if (a.type === "noul") {
+    value = a.noul.toFixed(2);
+    detail = bars([["yes", "yes である確率", a.noul]], "yes");
+  } else if (a.type === "choice") {
+    value = a.choice;
+    detail = bars(Object.entries(a.probabilities).sort((x, y) => y[1] - x[1]).map(([k, p]) => [k, k, p]), a.choice);
+  } else if (a.type === "score") {
+    value = a.score.toFixed(2);
+    const top = Object.entries(a.probabilities).sort((x, y) => y[1] - x[1])[0][0];
+    detail = bars(Object.entries(a.probabilities).map(([k, p]) => [k, `${k}: ${a.legend?.[k] ?? ""}`, p]), top);
+  } else {
+    field = "";
+  }
+  const confidence = a.confidence == null ? "" : `<div class="confidence">confidence <b>${a.confidence.toFixed(2)}</b> — この回答に基づいて自動処理してよいかの判断材料</div>`;
+  return `
+    <div class="answer ${esc(a.type)}">
+      <div class="answer-head">
+        <span class="badge">${esc(a.type)}</span>
+        <span class="answer-id">${esc(id)}</span>
+        <span class="answer-value">${esc(value)}</span>
+      </div>
+      <div class="answer-path">response.answers.${esc(id)}${field ? "." + esc(field) : ""}</div>
+      ${detail}${confidence}
+    </div>`;
+}
+
+const session = { ok: 0, failed: 0, inputTokens: 0, outputTokens: 0 };
+
+function renderMeter() {
+  $("m-requests").textContent = session.failed ? `${session.ok} (+失敗 ${session.failed})` : session.ok;
+  $("m-input").textContent = session.inputTokens.toLocaleString();
+  $("m-output").textContent = session.outputTokens.toLocaleString();
+  $("m-cost").textContent = usd(session.inputTokens);
+}
+
+function renderLastCall({ status, ok, roundTripMs, upstreamMs, requestId, usage }) {
+  const rows = [
+    ["直近の呼び出し", `<span class="${ok ? "ok" : "ng"}">HTTP ${status}</span>`],
+    ["所要時間", `${roundTripMs} ms（うち TypeSafe API ${esc(upstreamMs ?? "—")} ms）`],
+    ["request id", esc(requestId || "—")],
+  ];
+  if (usage) rows.push(["usage", `input ${usage.input_tokens} / output ${usage.output_tokens} tokens → ${usd(usage.input_tokens)}`]);
+  $("last-call").innerHTML = rows.map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join("");
+}
+
+async function run() {
+  if (!validate()) return;
+  if (!getKey()) { openSettings(); return; }
+  const button = $("run");
+  button.disabled = true;
+  const startedAt = performance.now();
+  try {
+    const res = await fetch("/api/systemone", {
+      method: "POST",
+      headers: authHeaders(),
+      body: editor.value,
+    });
+    const text = await res.text();
+    const roundTripMs = Math.round(performance.now() - startedAt);
+    let data;
+    try { data = JSON.parse(text); } catch { data = text; }
+
+    const usage = res.ok ? data.usage : null;
+    if (usage) {
+      session.ok += 1;
+      session.inputTokens += usage.input_tokens;
+      session.outputTokens += usage.output_tokens;
+    } else {
+      session.failed += 1;
+    }
+    renderMeter();
+    renderLastCall({
+      status: res.status, ok: res.ok, roundTripMs, usage,
+      upstreamMs: res.headers.get("X-Upstream-Ms"),
+      requestId: res.headers.get("X-Typesafe-Request-Id"),
+    });
+
+    const cards = res.ok
+      ? Object.entries(data.answers).map(([id, a]) => renderAnswer(id, a)).join("")
+      : `<div class="error-box">HTTP ${res.status} — API がエラーを返しました。下のボディに原因が入っています。</div>`;
+    const raw = typeof data === "string" ? esc(data) : highlightJson(data);
+    $("result").innerHTML = `${cards}<h2>レスポンスボディ（生 JSON）</h2><pre>${raw}</pre>`;
+  } catch (err) {
+    $("result").innerHTML = `<div class="error-box">呼び出しに失敗しました（server.js は起動していますか？）:${esc(err.message)}</div>`;
+  } finally {
+    button.disabled = false;
+  }
+}
+
+$("run").addEventListener("click", run);
+
+// ---------- モデル一覧 ----------
+
+async function loadModels() {
+  const el = $("models");
+  if (!getKey()) { el.textContent = "API キーを設定すると、利用可能なモデルを取得して表示します。"; return; }
+  el.textContent = "読み込み中…";
+  try {
+    const res = await fetch("/api/models", { headers: authHeaders() });
+    const data = await res.json();
+    if (!res.ok) {
+      el.innerHTML = `<span class="ng">取得失敗 (HTTP ${res.status})</span> ${esc(data.error ?? data.detail?.message ?? JSON.stringify(data))}`;
+      return;
+    }
+    el.innerHTML = `<table><tr><th>name</th><th>release_date</th><th>description</th></tr>${data.models
+      .map((m) => `<tr><td class="mono">${esc(m.name)}</td><td class="mono">${esc(m.release_date)}</td><td>${esc(m.description)}</td></tr>`)
+      .join("")}</table>`;
+  } catch (err) {
+    el.innerHTML = `<span class="ng">取得失敗</span> ${esc(err.message)}`;
+  }
+}
+
+$("schema").innerHTML = SCHEMA;
+loadSample(0);
+renderMeter();
+renderKeyState();
+loadModels();
+</script>
+</body>
+</html>
