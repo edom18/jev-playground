@@ -117,85 +117,86 @@
 <header>
   <div class="brand">
     <h1><span>Jev</span> Playground</h1>
-    <p>TypeSafe System One API — state と型付きの質問を送り、構造化された回答を受け取る</p>
+    <p data-i18n="brand.tagline">TypeSafe System One API — state と型付きの質問を送り、構造化された回答を受け取る</p>
   </div>
   <button id="open-settings" class="key-button" type="button"></button>
-  <dl class="meter" aria-label="このページを開いてからの利用量">
-    <div><dt>リクエスト</dt><dd id="m-requests">0</dd></div>
-    <div><dt>input tokens</dt><dd id="m-input">0</dd></div>
-    <div><dt>output tokens（無料）</dt><dd id="m-output">0</dd></div>
-    <div class="cost"><dt>推定コスト</dt><dd id="m-cost">$0.000000</dd></div>
+  <button id="lang-toggle" type="button"></button>
+  <dl class="meter" data-i18n-attr="aria-label:meter.ariaLabel" aria-label="このページを開いてからの利用量">
+    <div><dt data-i18n="meter.requests">リクエスト</dt><dd id="m-requests">0</dd></div>
+    <div><dt data-i18n="meter.input">input tokens</dt><dd id="m-input">0</dd></div>
+    <div><dt data-i18n="meter.output">output tokens（無料）</dt><dd id="m-output">0</dd></div>
+    <div class="cost"><dt data-i18n="meter.cost">推定コスト</dt><dd id="m-cost">$0.000000</dd></div>
   </dl>
-  <p class="meter-note">ページを開いてからの累計。コスト取得 API は無いため、レスポンスの <code>usage.input_tokens</code> × $0.042 / 100万トークン（jev-1.13 の公開単価）で算出</p>
+  <p class="meter-note" data-i18n="meter.note">ページを開いてからの累計。コスト取得 API は無いため、レスポンスの <code>usage.input_tokens</code> × $0.042 / 100万トークン（jev-1.13 の公開単価）で算出</p>
 </header>
 
 <main>
   <section class="pane">
-    <h2><span class="step">1</span>入力 <small>リクエストボディ（JSON）をそのまま編集</small></h2>
+    <h2 data-i18n="h2.input"><span class="step">1</span>入力 <small>リクエストボディ（JSON）をそのまま編集</small></h2>
     <div class="toolbar">
-      <select id="sample" aria-label="サンプル"></select>
-      <button id="open-guide" type="button">解説</button>
-      <button id="format" type="button">整形</button>
-      <button id="run" class="run" type="button">送信 ⌘↵</button>
+      <select id="sample" data-i18n-attr="aria-label:sample.ariaLabel" aria-label="サンプル"></select>
+      <button id="open-guide" type="button" data-i18n="btn.guide">解説</button>
+      <button id="format" type="button" data-i18n="btn.format">整形</button>
+      <button id="run" class="run" type="button" data-i18n="btn.run">送信 ⌘↵</button>
     </div>
-    <textarea id="editor" spellcheck="false" aria-label="リクエストボディ"></textarea>
+    <textarea id="editor" spellcheck="false" data-i18n-attr="aria-label:editor.ariaLabel" aria-label="リクエストボディ"></textarea>
     <p id="status" class="status"></p>
 
-    <h2><span class="step">3</span>結果 <small>質問 id ごとに型付きの回答が返る</small></h2>
-    <div id="result"><div class="placeholder">「送信」を押すと、ここに回答が表示されます</div></div>
+    <h2 data-i18n="h2.result"><span class="step">3</span>結果 <small>質問 id ごとに型付きの回答が返る</small></h2>
+    <div id="result"></div>
   </section>
 
   <section class="pane">
-    <h2><span class="step">2</span>API 呼び出し <small>エンドポイントは 1 本だけ</small></h2>
+    <h2 data-i18n="h2.apiCall"><span class="step">2</span>API 呼び出し <small>エンドポイントは 1 本だけ</small></h2>
     <div class="endpoint"><span class="method">POST</span>https://api.typesafe.ai/v1/systemone</div>
     <pre style="margin-top:8px">Authorization: Bearer <span id="key-mask"></span>
 Content-Type: application/json</pre>
-    <p class="note">API はブラウザからの直接呼び出しを CORS で拒否するため、このデモは <code>server.js</code> の <code>/api/systemone</code> を経由します。プロキシは「設定」で入力した API キーの <code>Authorization</code> ヘッダをそのまま転送するだけで、キーを保持しません。</p>
-    <dl class="kv" id="last-call"><dt>直近の呼び出し</dt><dd>—</dd></dl>
+    <p class="note" data-i18n="note.cors">API はブラウザからの直接呼び出しを CORS で拒否するため、このデモは <code>server.js</code> の <code>/api/systemone</code> を経由します。プロキシは「設定」で入力した API キーの <code>Authorization</code> ヘッダをそのまま転送するだけで、キーを保持しません。</p>
+    <dl class="kv" id="last-call"></dl>
 
-    <h2>送信コード <small>左の JSON に連動</small></h2>
+    <h2 data-i18n="h2.code">送信コード <small>左の JSON に連動</small></h2>
     <div class="tabs" role="tablist" id="code-tabs"></div>
     <pre id="code"></pre>
 
-    <h2>JSON の形</h2>
+    <h2 data-i18n="h2.schema">JSON の形</h2>
     <pre id="schema"></pre>
 
-    <h2>エラー</h2>
+    <h2 data-i18n="h2.errors">エラー</h2>
     <table>
-      <tr><th>Status</th><th>意味</th></tr>
-      <tr><td class="mono">401</td><td>API キーが無い / 不正</td></tr>
-      <tr><td class="mono">422</td><td>ボディの検証エラー。レスポンスに問題のフィールドが載る（サンプル「エラー例」で確認可）</td></tr>
-      <tr><td class="mono">429</td><td>レート制限超過。指数バックオフで再試行（SDK は自動）</td></tr>
-      <tr><td class="mono">529</td><td>一時的な過負荷。少し待って再試行</td></tr>
+      <tr><th data-i18n="errors.thStatus">Status</th><th data-i18n="errors.thMeaning">意味</th></tr>
+      <tr><td class="mono">401</td><td data-i18n="errors.401">API キーが無い / 不正</td></tr>
+      <tr><td class="mono">422</td><td data-i18n="errors.422">ボディの検証エラー。レスポンスに問題のフィールドが載る（サンプル「エラー例」で確認可）</td></tr>
+      <tr><td class="mono">429</td><td data-i18n="errors.429">レート制限超過。指数バックオフで再試行（SDK は自動）</td></tr>
+      <tr><td class="mono">529</td><td data-i18n="errors.529">一時的な過負荷。少し待って再試行</td></tr>
     </table>
 
-    <h2>モデル <small><code>GET /v1/models</code></small></h2>
-    <div id="models" class="note">読み込み中…</div>
+    <h2 data-i18n="h2.models">モデル <small><code>GET /v1/models</code></small></h2>
+    <div id="models" class="note"></div>
     <dl class="kv">
-      <dt>料金</dt><dd>$0.042 / 100万 input tokens（output は無料）</dd>
-      <dt>レート制限</dt><dd>250,000 tokens/秒 · 1,200 requests/分（変動あり）</dd>
-      <dt>コンテキスト</dt><dd>1 リクエスト 64k tokens · state + 最長の質問で 32k</dd>
-      <dt>入力</dt><dd>テキストのみ。英語が最も高精度、日本語は対応するが精度は劣る</dd>
+      <dt data-i18n="facts.price">料金</dt><dd data-i18n="facts.priceValue">$0.042 / 100万 input tokens（output は無料）</dd>
+      <dt data-i18n="facts.rate">レート制限</dt><dd data-i18n="facts.rateValue">250,000 tokens/秒 · 1,200 requests/分（変動あり）</dd>
+      <dt data-i18n="facts.context">コンテキスト</dt><dd data-i18n="facts.contextValue">1 リクエスト 64k tokens · state + 最長の質問で 32k</dd>
+      <dt data-i18n="facts.input">入力</dt><dd data-i18n="facts.inputValue">テキストのみ。英語が最も高精度、日本語は対応するが精度は劣る</dd>
     </dl>
-    <p class="note">出典: <a href="https://docs.typesafe.ai/api" target="_blank" rel="noopener">API reference</a> · <a href="https://docs.typesafe.ai/models" target="_blank" rel="noopener">Models</a></p>
+    <p class="note" data-i18n="note.sources">出典: <a href="https://docs.typesafe.ai/api" target="_blank" rel="noopener">API reference</a> · <a href="https://docs.typesafe.ai/models" target="_blank" rel="noopener">Models</a></p>
   </section>
 </main>
 
 <dialog id="guide">
   <div id="guide-body"></div>
-  <form method="dialog" class="actions"><span class="spacer"></span><button type="submit">閉じる</button></form>
+  <form method="dialog" class="actions"><span class="spacer"></span><button type="submit" data-i18n="guide.close">閉じる</button></form>
 </dialog>
 
 <dialog id="settings">
   <form method="dialog" id="settings-form">
-    <h2>設定 — API キー</h2>
-    <input id="key-input" type="password" autocomplete="off" spellcheck="false" placeholder="TypeSafe API キー" aria-label="TypeSafe API キー">
-    <p class="note">キーは <a href="https://console.typesafe.ai/keys" target="_blank" rel="noopener">console.typesafe.ai/keys</a> で発行できます。このブラウザの localStorage にだけ保存され、API 呼び出しのたびに <code>Authorization</code> ヘッダとしてこのデモのプロキシ経由で TypeSafe に送られます。プロキシはキーを保存・記録しません。</p>
+    <h2 data-i18n="settings.title">設定 — API キー</h2>
+    <input id="key-input" type="password" autocomplete="off" spellcheck="false" data-i18n-attr="placeholder:settings.keyLabel,aria-label:settings.keyLabel" placeholder="TypeSafe API キー" aria-label="TypeSafe API キー">
+    <p class="note" data-i18n="settings.note">キーは <a href="https://console.typesafe.ai/keys" target="_blank" rel="noopener">console.typesafe.ai/keys</a> で発行できます。このブラウザの localStorage にだけ保存され、API 呼び出しのたびに <code>Authorization</code> ヘッダとしてこのデモのプロキシ経由で TypeSafe に送られます。プロキシはキーを保存・記録しません。</p>
     <div class="actions">
-      <button id="key-delete" type="button">削除</button>
+      <button id="key-delete" type="button" data-i18n="settings.delete">削除</button>
       <span class="spacer"></span>
-      <button type="button" id="key-cancel">キャンセル</button>
-      <button class="run" type="submit">保存</button>
+      <button type="button" id="key-cancel" data-i18n="settings.cancel">キャンセル</button>
+      <button class="run" type="submit" data-i18n="settings.save">保存</button>
     </div>
   </form>
 </dialog>
@@ -207,24 +208,327 @@ const API_URL = "https://api.typesafe.ai/v1/systemone";
 
 const TICKET = "Hi, I've been trying to connect my Stripe account for 3 days and the integration keeps failing. I'm losing sales. Please help ASAP.";
 
+// ---------- 言語 ----------
+
+const I18N = {
+  ja: {
+    "lang.toggle": "English",
+
+    "brand.tagline": "TypeSafe System One API — state と型付きの質問を送り、構造化された回答を受け取る",
+    "meter.ariaLabel": "このページを開いてからの利用量",
+    "meter.requests": "リクエスト",
+    "meter.input": "input tokens",
+    "meter.output": "output tokens（無料）",
+    "meter.cost": "推定コスト",
+    "meter.note": "ページを開いてからの累計。コスト取得 API は無いため、レスポンスの <code>usage.input_tokens</code> × $0.042 / 100万トークン（jev-1.13 の公開単価）で算出",
+    "meter.requestsValue": "{ok} (+失敗 {failed})",
+
+    "h2.input": "<span class=\"step\">1</span>入力 <small>リクエストボディ（JSON）をそのまま編集</small>",
+    "h2.result": "<span class=\"step\">3</span>結果 <small>質問 id ごとに型付きの回答が返る</small>",
+    "h2.apiCall": "<span class=\"step\">2</span>API 呼び出し <small>エンドポイントは 1 本だけ</small>",
+    "h2.code": "送信コード <small>左の JSON に連動</small>",
+    "h2.schema": "JSON の形",
+    "h2.errors": "エラー",
+    "h2.models": "モデル <small><code>GET /v1/models</code></small>",
+
+    "sample.ariaLabel": "サンプル",
+    "editor.ariaLabel": "リクエストボディ",
+    "btn.guide": "解説",
+    "btn.format": "整形",
+    "btn.run": "送信 ⌘↵",
+
+    "status.valid": "有効な JSON · questions {count} 件（{counts}）",
+    "status.error": "JSON エラー: {message}",
+
+    "result.placeholder": "「送信」を押すと、ここに回答が表示されます",
+    "result.rawHeading": "レスポンスボディ（生 JSON）",
+    "result.httpError": "HTTP {status} — API がエラーを返しました。下のボディに原因が入っています。",
+    "result.fetchFailed": "呼び出しに失敗しました（server.js は起動していますか？）:{message}",
+    "answer.noulYes": "yes である確率",
+    "answer.confidence": "confidence <b>{value}</b> — この回答に基づいて自動処理してよいかの判断材料",
+
+    "note.cors": "API はブラウザからの直接呼び出しを CORS で拒否するため、このデモは <code>server.js</code> の <code>/api/systemone</code> を経由します。プロキシは「設定」で入力した API キーの <code>Authorization</code> ヘッダをそのまま転送するだけで、キーを保持しません。",
+    "lastCall.label": "直近の呼び出し",
+    "lastCall.none": "—",
+    "lastCall.duration": "所要時間",
+    "lastCall.durationValue": "{ms} ms（うち TypeSafe API {upstream} ms）",
+    "lastCall.requestId": "request id",
+    "lastCall.usage": "usage",
+    "lastCall.usageValue": "input {input} / output {output} tokens → {cost}",
+
+    "tab.curl": "curl",
+    "tab.fetch": "fetch",
+    "tab.jsSdk": "JS SDK",
+    "tab.pySdk": "Python SDK",
+    "tab.demo": "このデモ",
+
+    "code.fetchNote": "// サーバ側（Node 等）で実行。ブラウザからの直接呼び出しは CORS で拒否される",
+    "code.jsInstall": "// npm install @typesafe-ai/sdk   (Node.js 20+)",
+    "code.jsEnv": "// 環境変数 TYPESAFE_API_KEY を読む",
+    "code.jsHelpers": "// questions は choice(instructions, criteria) / score(...) / noul(...) ヘルパーでも書け、\n// 回答の型が質問から推論される",
+    "code.pyInstall": "# pip install typesafe-sdk   (Python 3.10+)",
+    "code.pyEnv": "# 環境変数 TYPESAFE_API_KEY を読む",
+    "code.pyHelpers": "# questions は Choice(...) / Score(...) / Noul(...) オブジェクトでも書ける",
+    "code.demoStep1": "// ① ブラウザ (index.html) → ローカルプロキシ",
+    "code.demoKey": "// 「設定」で入力したキー (localStorage)",
+    "code.demoBody": "// 左の JSON をそのまま送る",
+    "code.demoStep2": "// ② プロキシ (server.js) → TypeSafe API。Authorization はそのまま転送",
+    "code.demoStep3": "// ③ ステータスとボディは加工せずブラウザへ返す",
+
+    "errors.thStatus": "Status",
+    "errors.thMeaning": "意味",
+    "errors.401": "API キーが無い / 不正",
+    "errors.422": "ボディの検証エラー。レスポンスに問題のフィールドが載る（サンプル「エラー例」で確認可）",
+    "errors.429": "レート制限超過。指数バックオフで再試行（SDK は自動）",
+    "errors.529": "一時的な過負荷。少し待って再試行",
+
+    "models.noKey": "API キーを設定すると、利用可能なモデルを取得して表示します。",
+    "models.loading": "読み込み中…",
+    "models.failedHttp": "取得失敗 (HTTP {status})",
+    "models.failed": "取得失敗",
+    "models.thName": "name",
+    "models.thRelease": "release_date",
+    "models.thDescription": "description",
+
+    "facts.price": "料金",
+    "facts.priceValue": "$0.042 / 100万 input tokens（output は無料）",
+    "facts.rate": "レート制限",
+    "facts.rateValue": "250,000 tokens/秒 · 1,200 requests/分（変動あり）",
+    "facts.context": "コンテキスト",
+    "facts.contextValue": "1 リクエスト 64k tokens · state + 最長の質問で 32k",
+    "facts.input": "入力",
+    "facts.inputValue": "テキストのみ。英語が最も高精度、日本語は対応するが精度は劣る",
+    "note.sources": "出典: <a href=\"https://docs.typesafe.ai/api\" target=\"_blank\" rel=\"noopener\">API reference</a> · <a href=\"https://docs.typesafe.ai/models\" target=\"_blank\" rel=\"noopener\">Models</a>",
+
+    "guide.purpose": "想定している用途",
+    "guide.send": "指定しているもの",
+    "guide.returns": "返ってくるもの",
+    "guide.usage": "コード側での使い方",
+    "guide.source": "サンプルの出典",
+    "guide.close": "閉じる",
+
+    "key.set": "⚙ API キー {masked}",
+    "key.unset": "⚙ API キーを設定",
+    "key.maskUnset": "<未設定>",
+    "settings.title": "設定 — API キー",
+    "settings.keyLabel": "TypeSafe API キー",
+    "settings.note": "キーは <a href=\"https://console.typesafe.ai/keys\" target=\"_blank\" rel=\"noopener\">console.typesafe.ai/keys</a> で発行できます。このブラウザの localStorage にだけ保存され、API 呼び出しのたびに <code>Authorization</code> ヘッダとしてこのデモのプロキシ経由で TypeSafe に送られます。プロキシはキーを保存・記録しません。",
+    "settings.delete": "削除",
+    "settings.cancel": "キャンセル",
+    "settings.save": "保存",
+
+    "schema": `<span class="cm">// ── Request ─────────────────────────────────────────</span>
+{
+  state:     string | object | array,   <span class="cm">// 評価対象。必須</span>
+  model:     "jev-latest",              <span class="cm">// 必須。エイリアスか "jev-1.13.0" 等の固定 ID</span>
+  questions: { [id]: Question }         <span class="cm">// id は自由に命名。同じ id で回答が返る</span>
+}
+
+Question =
+  | { type: "noul",   instructions, criteria?: { true?, false? } }
+  | { type: "choice", instructions, criteria: { [option]: 説明 | null } }  <span class="cm">// 最大 255 個</span>
+  | { type: "score",  instructions, criteria: [レベル説明, ...] }          <span class="cm">// 順序つき 2〜10 個</span>
+<span class="cm">// instructions と criteria の各値は string | object | array。
+// object にすると質問文と参照データを分けられ、\`field\` で名前参照できる</span>
+
+<span class="cm">// ── Response ────────────────────────────────────────</span>
+{
+  model:   "jev-1.13.0",                <span class="cm">// 実際に回答したバージョン</span>
+  answers: { [id]: Answer },
+  usage:   { input_tokens, output_tokens }
+}
+
+Answer =
+  | { type: "noul",   noul }                                        <span class="cm">// 0(no)〜1(yes)</span>
+  | { type: "choice", choice, probabilities: { [option]: p }, confidence }
+  | { type: "score",  score, legend: { "0": 説明, ... },
+                      probabilities: { "0": p, ... }, confidence }  <span class="cm">// score は確率加重で小数になる</span>`,
+  },
+
+  en: {
+    "lang.toggle": "日本語",
+
+    "brand.tagline": "TypeSafe System One API — send a state and typed questions, get structured answers back",
+    "meter.ariaLabel": "Usage since this page was opened",
+    "meter.requests": "requests",
+    "meter.input": "input tokens",
+    "meter.output": "output tokens (free)",
+    "meter.cost": "estimated cost",
+    "meter.note": "Cumulative since the page was opened. There is no cost API, so this is computed from the response's <code>usage.input_tokens</code> × $0.042 per million tokens (the published jev-1.13 price).",
+    "meter.requestsValue": "{ok} (+{failed} failed)",
+
+    "h2.input": "<span class=\"step\">1</span>Input <small>Edit the request body (JSON) directly</small>",
+    "h2.result": "<span class=\"step\">3</span>Result <small>One typed answer per question id</small>",
+    "h2.apiCall": "<span class=\"step\">2</span>API call <small>Only one endpoint</small>",
+    "h2.code": "Request code <small>Follows the JSON on the left</small>",
+    "h2.schema": "JSON shape",
+    "h2.errors": "Errors",
+    "h2.models": "Models <small><code>GET /v1/models</code></small>",
+
+    "sample.ariaLabel": "Sample",
+    "editor.ariaLabel": "Request body",
+    "btn.guide": "Guide",
+    "btn.format": "Format",
+    "btn.run": "Send ⌘↵",
+
+    "status.valid": "Valid JSON · {count} questions ({counts})",
+    "status.error": "JSON error: {message}",
+
+    "result.placeholder": "Press “Send” and the answers will appear here",
+    "result.rawHeading": "Response body (raw JSON)",
+    "result.httpError": "HTTP {status} — the API returned an error. The body below explains why.",
+    "result.fetchFailed": "The call failed (is server.js running?): {message}",
+    "answer.noulYes": "probability of yes",
+    "answer.confidence": "confidence <b>{value}</b> — a signal for whether you can act on this answer automatically",
+
+    "note.cors": "The API rejects direct calls from the browser with CORS, so this demo goes through <code>/api/systemone</code> in <code>server.js</code>. The proxy only forwards the <code>Authorization</code> header carrying the API key you enter in Settings; it keeps no copy of the key.",
+    "lastCall.label": "Last call",
+    "lastCall.none": "—",
+    "lastCall.duration": "Duration",
+    "lastCall.durationValue": "{ms} ms ({upstream} ms of it in the TypeSafe API)",
+    "lastCall.requestId": "request id",
+    "lastCall.usage": "usage",
+    "lastCall.usageValue": "input {input} / output {output} tokens → {cost}",
+
+    "tab.curl": "curl",
+    "tab.fetch": "fetch",
+    "tab.jsSdk": "JS SDK",
+    "tab.pySdk": "Python SDK",
+    "tab.demo": "This demo",
+
+    "code.fetchNote": "// Run this server-side (Node or similar). Direct calls from the browser are rejected by CORS",
+    "code.jsInstall": "// npm install @typesafe-ai/sdk   (Node.js 20+)",
+    "code.jsEnv": "// reads the TYPESAFE_API_KEY environment variable",
+    "code.jsHelpers": "// questions can also be written with the choice(instructions, criteria) / score(...) / noul(...)\n// helpers, and the answer types are inferred from the questions",
+    "code.pyInstall": "# pip install typesafe-sdk   (Python 3.10+)",
+    "code.pyEnv": "# reads the TYPESAFE_API_KEY environment variable",
+    "code.pyHelpers": "# questions can also be written as Choice(...) / Score(...) / Noul(...) objects",
+    "code.demoStep1": "// 1. Browser (index.html) → local proxy",
+    "code.demoKey": "// the key entered in Settings (localStorage)",
+    "code.demoBody": "// send the JSON on the left as-is",
+    "code.demoStep2": "// 2. Proxy (server.js) → TypeSafe API. Authorization is forwarded unchanged",
+    "code.demoStep3": "// 3. The status and body are returned to the browser unmodified",
+
+    "errors.thStatus": "Status",
+    "errors.thMeaning": "Meaning",
+    "errors.401": "Missing or invalid API key",
+    "errors.422": "Body validation error. The response names the offending field (try the “Error example” sample)",
+    "errors.429": "Rate limit exceeded. Retry with exponential backoff (the SDKs do it for you)",
+    "errors.529": "Temporary overload. Wait a moment and retry",
+
+    "models.noKey": "Set an API key and the available models will be fetched and listed here.",
+    "models.loading": "Loading…",
+    "models.failedHttp": "Fetch failed (HTTP {status})",
+    "models.failed": "Fetch failed",
+    "models.thName": "name",
+    "models.thRelease": "release_date",
+    "models.thDescription": "description",
+
+    "facts.price": "Price",
+    "facts.priceValue": "$0.042 per million input tokens (output is free)",
+    "facts.rate": "Rate limits",
+    "facts.rateValue": "250,000 tokens/sec · 1,200 requests/min (subject to change)",
+    "facts.context": "Context",
+    "facts.contextValue": "64k tokens per request · 32k for state plus the longest question",
+    "facts.input": "Input",
+    "facts.inputValue": "Text only. Accuracy is highest in English; Japanese works but is less accurate",
+    "note.sources": "Sources: <a href=\"https://docs.typesafe.ai/api\" target=\"_blank\" rel=\"noopener\">API reference</a> · <a href=\"https://docs.typesafe.ai/models\" target=\"_blank\" rel=\"noopener\">Models</a>",
+
+    "guide.purpose": "What it is for",
+    "guide.send": "What it sends",
+    "guide.returns": "What comes back",
+    "guide.usage": "How to use it in code",
+    "guide.source": "Sample source",
+    "guide.close": "Close",
+
+    "key.set": "⚙ API key {masked}",
+    "key.unset": "⚙ Set API key",
+    "key.maskUnset": "<not set>",
+    "settings.title": "Settings — API key",
+    "settings.keyLabel": "TypeSafe API key",
+    "settings.note": "You can issue a key at <a href=\"https://console.typesafe.ai/keys\" target=\"_blank\" rel=\"noopener\">console.typesafe.ai/keys</a>. It is stored only in this browser's localStorage, and on every API call it is sent to TypeSafe as the <code>Authorization</code> header through this demo's proxy. The proxy neither stores nor logs the key.",
+    "settings.delete": "Delete",
+    "settings.cancel": "Cancel",
+    "settings.save": "Save",
+
+    "schema": `<span class="cm">// ── Request ─────────────────────────────────────────</span>
+{
+  state:     string | object | array,   <span class="cm">// The subject to evaluate. Required</span>
+  model:     "jev-latest",              <span class="cm">// Required. An alias, or a pinned id such as "jev-1.13.0"</span>
+  questions: { [id]: Question }         <span class="cm">// Name the ids freely. Answers come back under the same ids</span>
+}
+
+Question =
+  | { type: "noul",   instructions, criteria?: { true?, false? } }
+  | { type: "choice", instructions, criteria: { [option]: desc | null } }  <span class="cm">// up to 255</span>
+  | { type: "score",  instructions, criteria: [level desc, ...] }          <span class="cm">// ordered, 2 to 10</span>
+<span class="cm">// Each value of instructions and criteria is string | object | array.
+// An object separates the question from its reference data, addressable by name with \`field\`</span>
+
+<span class="cm">// ── Response ────────────────────────────────────────</span>
+{
+  model:   "jev-1.13.0",                <span class="cm">// The version that actually answered</span>
+  answers: { [id]: Answer },
+  usage:   { input_tokens, output_tokens }
+}
+
+Answer =
+  | { type: "noul",   noul }                                        <span class="cm">// 0(no) to 1(yes)</span>
+  | { type: "choice", choice, probabilities: { [option]: p }, confidence }
+  | { type: "score",  score, legend: { "0": desc, ... },
+                      probabilities: { "0": p, ... }, confidence }  <span class="cm">// score is probability-weighted, so fractional</span>`,
+  },
+};
+
+const savedLang = localStorage.getItem("lang");
+let lang = savedLang === "ja" || savedLang === "en"
+  ? savedLang
+  : (navigator.language || "").startsWith("ja") ? "ja" : "en";
+
+function t(key, vars) {
+  const text = I18N[lang][key];
+  return vars ? text.replace(/\{(\w+)\}/g, (m, name) => vars[name] ?? m) : text;
+}
+
 const SAMPLES = [
   {
-    label: "サポートチケット — Choice / Score / Noul を 1 回で",
+    label: {
+      ja: "サポートチケット — Choice / Score / Noul を 1 回で",
+      en: "Support ticket — Choice / Score / Noul in one call",
+    },
     guide: {
-      purpose: "問い合わせ 1 件を「どの部署に回すか」「どれくらい怒っているか」「急ぎか」の 3 観点で同時に判定する、もっとも典型的な使い方です。",
-      send: [
-        "`state`: 問い合わせ本文（文字列）",
-        "`department`（choice）: 3 つの部署と、それぞれが何を扱うかの説明",
-        "`frustration`（score）: 冷静〜激怒の 3 段階を順番に並べたルーブリック",
-        "`is_urgent`（noul）: 「緊急性を伝えている」という、はい/いいえで判定できる文",
-      ],
-      returns: [
-        "`department.choice`: 選ばれた部署。`probabilities` に全部署の確率、`confidence` に確信度",
-        "`frustration.score`: 0〜2 の位置（確率加重なので小数になりうる）",
-        "`is_urgent.noul`: 「はい」である確率（0〜1）",
-      ],
-      usage: "質問は同じ state に対して並列かつ独立に評価されるので、質問を増やしても応答時間はほぼ変わりません。コード側では choice を分岐に、score をしきい値に、noul を if 文にそのまま使います。",
-      source: "Quick start の例そのまま",
+      ja: {
+        purpose: "問い合わせ 1 件を「どの部署に回すか」「どれくらい怒っているか」「急ぎか」の 3 観点で同時に判定する、もっとも典型的な使い方です。",
+        send: [
+          "`state`: 問い合わせ本文（文字列）",
+          "`department`（choice）: 3 つの部署と、それぞれが何を扱うかの説明",
+          "`frustration`（score）: 冷静〜激怒の 3 段階を順番に並べたルーブリック",
+          "`is_urgent`（noul）: 「緊急性を伝えている」という、はい/いいえで判定できる文",
+        ],
+        returns: [
+          "`department.choice`: 選ばれた部署。`probabilities` に全部署の確率、`confidence` に確信度",
+          "`frustration.score`: 0〜2 の位置（確率加重なので小数になりうる）",
+          "`is_urgent.noul`: 「はい」である確率（0〜1）",
+        ],
+        usage: "質問は同じ state に対して並列かつ独立に評価されるので、質問を増やしても応答時間はほぼ変わりません。コード側では choice を分岐に、score をしきい値に、noul を if 文にそのまま使います。",
+        source: "Quick start の例そのまま",
+      },
+      en: {
+        purpose: "The most typical use: judging a single inquiry on three axes at once — which team to route it to, how angry the customer is, and whether it is urgent.",
+        send: [
+          "`state`: the text of the inquiry (a string)",
+          "`department` (choice): three teams, each with a description of what it handles",
+          "`frustration` (score): a rubric of three levels in order, from calm to furious",
+          "`is_urgent` (noul): a statement that can be judged yes/no — that the message conveys urgency",
+        ],
+        returns: [
+          "`department.choice`: the team that was picked. `probabilities` holds the probability of every team, `confidence` the certainty",
+          "`frustration.score`: a position between 0 and 2 (probability-weighted, so it can be fractional)",
+          "`is_urgent.noul`: the probability that the answer is yes (0 to 1)",
+        ],
+        usage: "Questions are evaluated in parallel and independently against the same state, so adding questions barely changes the response time. In your code you branch on choice, threshold on score, and drop noul straight into an if statement.",
+        source: "Taken as-is from the Quick start example",
+      },
     },
     body: {
       state: TICKET,
@@ -249,19 +553,37 @@ const SAMPLES = [
     },
   },
   {
-    label: "Noul — はい/いいえの確率（criteria 付き）",
+    label: {
+      ja: "Noul — はい/いいえの確率（criteria 付き）",
+      en: "Noul — yes/no probability (with criteria)",
+    },
     guide: {
-      purpose: "はい/いいえで答えられる 1 つの問いについて「はいである確率」を得ます。個人情報を含むか、返金を求めているか、といったフラグ判定向けです。",
-      send: [
-        "`instructions`: はい/いいえで答えられる問い（または真偽を判定できる文）",
-        "`criteria`（任意）: `true` と `false` がそれぞれ何を意味するかの補足。境界が曖昧なときに書く",
-      ],
-      returns: [
-        "`noul`: 0（いいえ）〜1（はい）の確率。0.5 付近は「どちらとも言えない」",
-        "Noul には `confidence` はありません（確率そのものが確からしさ）",
-      ],
-      usage: "`if (noul > 0.8)` のように、しきい値を自分で決めて分岐します。「程度」を測りたい場合は Noul ではなく Score を使います。",
-      source: "API reference の例そのまま",
+      ja: {
+        purpose: "はい/いいえで答えられる 1 つの問いについて「はいである確率」を得ます。個人情報を含むか、返金を求めているか、といったフラグ判定向けです。",
+        send: [
+          "`instructions`: はい/いいえで答えられる問い（または真偽を判定できる文）",
+          "`criteria`（任意）: `true` と `false` がそれぞれ何を意味するかの補足。境界が曖昧なときに書く",
+        ],
+        returns: [
+          "`noul`: 0（いいえ）〜1（はい）の確率。0.5 付近は「どちらとも言えない」",
+          "Noul には `confidence` はありません（確率そのものが確からしさ）",
+        ],
+        usage: "`if (noul > 0.8)` のように、しきい値を自分で決めて分岐します。「程度」を測りたい場合は Noul ではなく Score を使います。",
+        source: "API reference の例そのまま",
+      },
+      en: {
+        purpose: "Gets the probability that the answer is yes for one question that can be answered yes or no. Good for flags such as whether personal data is present or whether a refund is being requested.",
+        send: [
+          "`instructions`: a question answerable with yes/no (or a statement that can be judged true or false)",
+          "`criteria` (optional): what `true` and `false` each mean. Write it when the boundary is fuzzy",
+        ],
+        returns: [
+          "`noul`: a probability from 0 (no) to 1 (yes). Values near 0.5 mean it could go either way",
+          "Noul has no `confidence` (the probability itself is the certainty)",
+        ],
+        usage: "Pick your own threshold and branch on it, for example `if (noul > 0.8)`. To measure a degree rather than a yes/no, use Score instead of Noul.",
+        source: "Taken as-is from the API reference example",
+      },
     },
     body: {
       state: "Help! My payouts have been failing for 3 days.",
@@ -276,21 +598,41 @@ const SAMPLES = [
     },
   },
   {
-    label: "Choice — 選択肢から 1 つ（説明なしは null）",
+    label: {
+      ja: "Choice — 選択肢から 1 つ（説明なしは null）",
+      en: "Choice — one option out of several (null when no description is needed)",
+    },
     guide: {
-      purpose: "順序のない既知の選択肢から 1 つを選ぶ分類です。チケットの振り分け、文書種別の判定、意図の分類などに使います。",
-      send: [
-        "`state`: ここではオブジェクト（`document` フィールドに本文）",
-        "`criteria`: 「選択肢名: 説明」のマップ。ラベル名だけで意味が明らかなら説明は `null` でよい（最大 255 個）",
-        "想定外の入力がありうるなら `other` のような受け皿の選択肢を入れておく",
-      ],
-      returns: [
-        "`choice`: もっとも確率の高い選択肢",
-        "`probabilities`: 全選択肢の確率（合計 1）。必ず自分が渡した選択肢の中から返る",
-        "`confidence`: 確率分布がどれだけ 1 つに偏っているか（0〜1）",
-      ],
-      usage: "`choice` でコードを分岐し、`confidence` が低いときは自動処理せず人に回す、という使い分けが基本です（ドキュメントの Confidence-gated routing パターン）。",
-      source: "JavaScript SDK Quickstart の例を JSON にしたもの",
+      ja: {
+        purpose: "順序のない既知の選択肢から 1 つを選ぶ分類です。チケットの振り分け、文書種別の判定、意図の分類などに使います。",
+        send: [
+          "`state`: ここではオブジェクト（`document` フィールドに本文）",
+          "`criteria`: 「選択肢名: 説明」のマップ。ラベル名だけで意味が明らかなら説明は `null` でよい（最大 255 個）",
+          "想定外の入力がありうるなら `other` のような受け皿の選択肢を入れておく",
+        ],
+        returns: [
+          "`choice`: もっとも確率の高い選択肢",
+          "`probabilities`: 全選択肢の確率（合計 1）。必ず自分が渡した選択肢の中から返る",
+          "`confidence`: 確率分布がどれだけ 1 つに偏っているか（0〜1）",
+        ],
+        usage: "`choice` でコードを分岐し、`confidence` が低いときは自動処理せず人に回す、という使い分けが基本です（ドキュメントの Confidence-gated routing パターン）。",
+        source: "JavaScript SDK Quickstart の例を JSON にしたもの",
+      },
+      en: {
+        purpose: "Classification that picks one option out of a known, unordered set. Used for ticket routing, document type detection, intent classification and the like.",
+        send: [
+          "`state`: an object here (the text sits in the `document` field)",
+          "`criteria`: a map of option name to description. When the label alone makes the meaning clear, the description can be `null` (up to 255 options)",
+          "If unexpected input is possible, add a catch-all option such as `other`",
+        ],
+        returns: [
+          "`choice`: the most probable option",
+          "`probabilities`: the probability of every option (summing to 1). The answer is always one of the options you passed",
+          "`confidence`: how concentrated the distribution is on a single option (0 to 1)",
+        ],
+        usage: "The basic pattern is to branch on `choice` and, when `confidence` is low, hand the case to a human instead of processing it automatically (the Confidence-gated routing pattern in the docs).",
+        source: "The JavaScript SDK Quickstart example, rewritten as JSON",
+      },
     },
     body: {
       state: { document: "I was charged twice. Please fix this ASAP." },
@@ -305,20 +647,39 @@ const SAMPLES = [
     },
   },
   {
-    label: "Score — 順序つきルーブリックで採点",
+    label: {
+      ja: "Score — 順序つきルーブリックで採点",
+      en: "Score — grading on an ordered rubric",
+    },
     guide: {
-      purpose: "深刻度・不満度・スキルレベルのような「程度」を、自分で定義した段階の上で測ります。",
-      send: [
-        "`instructions`: 何を測るか",
-        "`criteria`: 段階の説明を低い順に並べた配列（2〜10 個）。配列の位置 0, 1, 2… がそのままスコアになる",
-      ],
-      returns: [
-        "`score`: 確率加重の位置。1.05 のように段階の間に落ちることがある",
-        "`legend`: 段階番号と説明の対応。`probabilities`: 段階ごとの確率",
-        "`confidence`: 確信度（0〜1）",
-      ],
-      usage: "しきい値での分岐や並べ替えに使います。複雑な評価は観点ごとに Score を分けて 1 リクエストで聞き、重み付けはコード側で行います（Composite scoring パターン）。",
-      source: "API reference の例そのまま",
+      ja: {
+        purpose: "深刻度・不満度・スキルレベルのような「程度」を、自分で定義した段階の上で測ります。",
+        send: [
+          "`instructions`: 何を測るか",
+          "`criteria`: 段階の説明を低い順に並べた配列（2〜10 個）。配列の位置 0, 1, 2… がそのままスコアになる",
+        ],
+        returns: [
+          "`score`: 確率加重の位置。1.05 のように段階の間に落ちることがある",
+          "`legend`: 段階番号と説明の対応。`probabilities`: 段階ごとの確率",
+          "`confidence`: 確信度（0〜1）",
+        ],
+        usage: "しきい値での分岐や並べ替えに使います。複雑な評価は観点ごとに Score を分けて 1 リクエストで聞き、重み付けはコード側で行います（Composite scoring パターン）。",
+        source: "API reference の例そのまま",
+      },
+      en: {
+        purpose: "Measures a degree — severity, frustration, skill level — on levels that you define yourself.",
+        send: [
+          "`instructions`: what is being measured",
+          "`criteria`: an array of level descriptions from lowest to highest (2 to 10 of them). The array position 0, 1, 2… is the score itself",
+        ],
+        returns: [
+          "`score`: a probability-weighted position. It can land between levels, such as 1.05",
+          "`legend`: level number to description. `probabilities`: the probability of each level",
+          "`confidence`: the certainty (0 to 1)",
+        ],
+        usage: "Use it for threshold branching and sorting. For a complex evaluation, split it into one Score per aspect, ask them all in a single request, and do the weighting in your code (the Composite scoring pattern).",
+        source: "Taken as-is from the API reference example",
+      },
     },
     body: {
       state: "Help! My payouts have been failing for 3 days.",
@@ -333,20 +694,39 @@ const SAMPLES = [
     },
   },
   {
-    label: "構造化 state — 会話・注文・ポリシーを 1 つの state に",
+    label: {
+      ja: "構造化 state — 会話・注文・ポリシーを 1 つの state に",
+      en: "Structured state — conversation, order and policy in one state",
+    },
     guide: {
-      purpose: "会話ログ・注文レコード・社内ポリシーのように、判断に必要な材料をまとめて 1 つの state として渡し、それらを突き合わせる判断をさせます。",
-      send: [
-        "`state`: 名前付きフィールドを持つオブジェクト（`ticket` / `order` / `refund_policy`）",
-        "`instructions` の中でバッククォート付きのフィールド名（例: `refund_policy`）を書くと、state の特定の部分を指して質問できる",
-        "事実は state に、判断したいことは questions に、と分けるのが基本",
-      ],
-      returns: [
-        "`refund_requested.noul` と `policy_supports_refund.noul`: それぞれ独立した確率",
-        "`next_action.choice`: 次に取るべき対応",
-      ],
-      usage: "「返金要求あり、かつポリシー上も可なら自動返金」のように、複数の回答をコード側で組み合わせて業務ルールにします。質問同士は互いの回答を見ません。",
-      source: "state は State ページの例そのまま、questions はこのデモ用に作成",
+      ja: {
+        purpose: "会話ログ・注文レコード・社内ポリシーのように、判断に必要な材料をまとめて 1 つの state として渡し、それらを突き合わせる判断をさせます。",
+        send: [
+          "`state`: 名前付きフィールドを持つオブジェクト（`ticket` / `order` / `refund_policy`）",
+          "`instructions` の中でバッククォート付きのフィールド名（例: `refund_policy`）を書くと、state の特定の部分を指して質問できる",
+          "事実は state に、判断したいことは questions に、と分けるのが基本",
+        ],
+        returns: [
+          "`refund_requested.noul` と `policy_supports_refund.noul`: それぞれ独立した確率",
+          "`next_action.choice`: 次に取るべき対応",
+        ],
+        usage: "「返金要求あり、かつポリシー上も可なら自動返金」のように、複数の回答をコード側で組み合わせて業務ルールにします。質問同士は互いの回答を見ません。",
+        source: "state は State ページの例そのまま、questions はこのデモ用に作成",
+      },
+      en: {
+        purpose: "Hand over everything the judgement needs — a conversation log, an order record, an internal policy — as a single state, and have the model reconcile them.",
+        send: [
+          "`state`: an object with named fields (`ticket` / `order` / `refund_policy`)",
+          "Writing a backquoted field name inside `instructions` (for example `refund_policy`) lets a question point at one specific part of the state",
+          "As a rule, facts belong in the state and the judgements you want belong in the questions",
+        ],
+        returns: [
+          "`refund_requested.noul` and `policy_supports_refund.noul`: two independent probabilities",
+          "`next_action.choice`: what support should do next",
+        ],
+        usage: "Combine several answers in your code into a business rule, such as refunding automatically when a refund was requested and the policy allows it. The questions never see each other's answers.",
+        source: "The state is taken as-is from the State page example; the questions were written for this demo",
+      },
     },
     body: {
       state: {
@@ -383,16 +763,31 @@ const SAMPLES = [
     },
   },
   {
-    label: "構造化 instructions — 質問側に参照データを持たせる",
+    label: {
+      ja: "構造化 instructions — 質問側に参照データを持たせる",
+      en: "Structured instructions — reference data on the question",
+    },
     guide: {
-      purpose: "質問ごとに違う参照データと照合したいとき（重複レコードの判定など）に使います。評価対象は state に、比較相手は質問側に持たせます。",
-      send: [
-        "`state`: 評価対象の履歴書",
-        "`instructions`: 文字列ではなくオブジェクト。`question` フィールドに問いを、`potential_duplicate` フィールドに比較相手のデータを入れ、問いの中からバッククォートで参照する",
-      ],
-      returns: ["`is_duplicate.noul`: 同一人物である確率"],
-      usage: "候補が複数あるなら、候補ごとに質問を 1 つずつ作って 1 リクエストにまとめ、noul が最大の候補を採用する、といった使い方ができます。`criteria` の各値も同じようにオブジェクトや配列で書けます。",
-      source: "instructions は API reference の例そのまま、state（履歴書）はこのデモ用に作成",
+      ja: {
+        purpose: "質問ごとに違う参照データと照合したいとき（重複レコードの判定など）に使います。評価対象は state に、比較相手は質問側に持たせます。",
+        send: [
+          "`state`: 評価対象の履歴書",
+          "`instructions`: 文字列ではなくオブジェクト。`question` フィールドに問いを、`potential_duplicate` フィールドに比較相手のデータを入れ、問いの中からバッククォートで参照する",
+        ],
+        returns: ["`is_duplicate.noul`: 同一人物である確率"],
+        usage: "候補が複数あるなら、候補ごとに質問を 1 つずつ作って 1 リクエストにまとめ、noul が最大の候補を採用する、といった使い方ができます。`criteria` の各値も同じようにオブジェクトや配列で書けます。",
+        source: "instructions は API reference の例そのまま、state（履歴書）はこのデモ用に作成",
+      },
+      en: {
+        purpose: "For matching against different reference data per question, such as spotting duplicate records. The subject being evaluated goes in the state, the thing to compare it against goes on the question.",
+        send: [
+          "`state`: the resume being evaluated",
+          "`instructions`: an object instead of a string. Put the question in the `question` field and the comparison data in the `potential_duplicate` field, then reference it from the question with backquotes",
+        ],
+        returns: ["`is_duplicate.noul`: the probability that this is the same person"],
+        usage: "With several candidates, write one question per candidate, send them in a single request, and take the candidate with the highest noul. Each value in `criteria` can be an object or an array in the same way.",
+        source: "The instructions are taken as-is from the API reference example; the state (the resume) was written for this demo",
+      },
     },
     body: {
       state: {
@@ -418,16 +813,31 @@ const SAMPLES = [
     },
   },
   {
-    label: "日本語テキスト — 対応はするが精度は英語より劣る",
+    label: {
+      ja: "日本語テキスト — 対応はするが精度は英語より劣る",
+      en: "Japanese text — supported, but less accurate than English",
+    },
     guide: {
-      purpose: "日本語の問い合わせに対して、振り分け・緊急度・返金要求の 3 つを同時に判定します。日本語でどの程度使えるかを試すためのサンプルです。",
-      send: [
-        "`state`・`instructions`・`criteria` をすべて日本語で記述",
-        "選択肢のキー（`shipping` など）はコードで扱う値なので英語のままにしている",
-      ],
-      returns: ["`category.choice`、`urgency.score`、`wants_refund.noul`（形は英語のときと同じ）"],
-      usage: "ドキュメントによると Jev の主な学習言語は英語で、日本語を含む CJK は受け付けるものの精度は劣ります。本番で使う前に自分のデータで検証し、`confidence` が低い回答は人に回す設計が勧められています。",
-      source: "このデモ用に作成",
+      ja: {
+        purpose: "日本語の問い合わせに対して、振り分け・緊急度・返金要求の 3 つを同時に判定します。日本語でどの程度使えるかを試すためのサンプルです。",
+        send: [
+          "`state`・`instructions`・`criteria` をすべて日本語で記述",
+          "選択肢のキー（`shipping` など）はコードで扱う値なので英語のままにしている",
+        ],
+        returns: ["`category.choice`、`urgency.score`、`wants_refund.noul`（形は英語のときと同じ）"],
+        usage: "ドキュメントによると Jev の主な学習言語は英語で、日本語を含む CJK は受け付けるものの精度は劣ります。本番で使う前に自分のデータで検証し、`confidence` が低い回答は人に回す設計が勧められています。",
+        source: "このデモ用に作成",
+      },
+      en: {
+        purpose: "Judges a Japanese inquiry on three things at once: routing, urgency, and whether a refund is being asked for. A sample for trying out how far Japanese gets you.",
+        send: [
+          "`state`, `instructions` and `criteria` are all written in Japanese",
+          "The option keys (`shipping` and so on) stay in English, because they are values your code handles",
+        ],
+        returns: ["`category.choice`, `urgency.score` and `wants_refund.noul` (the same shapes as in English)"],
+        usage: "According to the docs, Jev is trained mainly on English; CJK including Japanese is accepted, but accuracy is lower. The docs recommend validating on your own data before production and routing low-`confidence` answers to a human.",
+        source: "Written for this demo",
+      },
     },
     body: {
       state: "先週注文した商品がまだ届きません。追跡番号を見ても3日前から動いていないようです。明日のイベントで使う予定なので、今日中に状況を教えてください。",
@@ -452,16 +862,31 @@ const SAMPLES = [
     },
   },
   {
-    label: "エラー例 — criteria の無い Choice（422 を確認）",
+    label: {
+      ja: "エラー例 — criteria の無い Choice（422 を確認）",
+      en: "Error example — a Choice with no criteria (see the 422)",
+    },
     guide: {
-      purpose: "リクエストの形を間違えたときに API が何を返すかを確認するためのサンプルです。",
-      send: ["`type` が `choice` なのに、必須の `criteria` を省略している"],
-      returns: [
-        "API reference によれば HTTP 422 が返り、ボディに問題のあったフィールドが示される",
-        "エラー時は `usage` が返らないので、このページのコスト集計には加算されない",
-      ],
-      usage: "422 はリクエスト側のバグなので再試行しても直りません。再試行すべきなのは 429（レート制限）と 529（過負荷）で、指数バックオフを使います（SDK は自動で行います）。",
-      source: "このデモ用に作成",
+      ja: {
+        purpose: "リクエストの形を間違えたときに API が何を返すかを確認するためのサンプルです。",
+        send: ["`type` が `choice` なのに、必須の `criteria` を省略している"],
+        returns: [
+          "API reference によれば HTTP 422 が返り、ボディに問題のあったフィールドが示される",
+          "エラー時は `usage` が返らないので、このページのコスト集計には加算されない",
+        ],
+        usage: "422 はリクエスト側のバグなので再試行しても直りません。再試行すべきなのは 429（レート制限）と 529（過負荷）で、指数バックオフを使います（SDK は自動で行います）。",
+        source: "このデモ用に作成",
+      },
+      en: {
+        purpose: "A sample for seeing what the API returns when the shape of the request is wrong.",
+        send: ["`type` is `choice`, yet the required `criteria` is omitted"],
+        returns: [
+          "According to the API reference, HTTP 422 is returned and the body names the field that was wrong",
+          "No `usage` comes back on an error, so nothing is added to the cost total on this page",
+        ],
+        usage: "A 422 is a bug on the request side, so retrying will not fix it. The ones worth retrying are 429 (rate limit) and 529 (overload), with exponential backoff (the SDKs do it for you).",
+        source: "Written for this demo",
+      },
     },
     body: {
       state: "Help! My payouts have been failing for 3 days.",
@@ -470,33 +895,6 @@ const SAMPLES = [
     },
   },
 ];
-
-const SCHEMA = `<span class="cm">// ── Request ─────────────────────────────────────────</span>
-{
-  state:     string | object | array,   <span class="cm">// 評価対象。必須</span>
-  model:     "jev-latest",              <span class="cm">// 必須。エイリアスか "jev-1.13.0" 等の固定 ID</span>
-  questions: { [id]: Question }         <span class="cm">// id は自由に命名。同じ id で回答が返る</span>
-}
-
-Question =
-  | { type: "noul",   instructions, criteria?: { true?, false? } }
-  | { type: "choice", instructions, criteria: { [option]: 説明 | null } }  <span class="cm">// 最大 255 個</span>
-  | { type: "score",  instructions, criteria: [レベル説明, ...] }          <span class="cm">// 順序つき 2〜10 個</span>
-<span class="cm">// instructions と criteria の各値は string | object | array。
-// object にすると質問文と参照データを分けられ、\`field\` で名前参照できる</span>
-
-<span class="cm">// ── Response ────────────────────────────────────────</span>
-{
-  model:   "jev-1.13.0",                <span class="cm">// 実際に回答したバージョン</span>
-  answers: { [id]: Answer },
-  usage:   { input_tokens, output_tokens }
-}
-
-Answer =
-  | { type: "noul",   noul }                                        <span class="cm">// 0(no)〜1(yes)</span>
-  | { type: "choice", choice, probabilities: { [option]: p }, confidence }
-  | { type: "score",  score, legend: { "0": 説明, ... },
-                      probabilities: { "0": p, ... }, confidence }  <span class="cm">// score は確率加重で小数になる</span>`;
 
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
@@ -523,9 +921,9 @@ function renderKeyState() {
   const key = getKey();
   const masked = key ? `••••${key.slice(-4)}` : "";
   const button = $("open-settings");
-  button.textContent = key ? `⚙ API キー ${masked}` : "⚙ API キーを設定";
+  button.textContent = key ? t("key.set", { masked }) : t("key.unset");
   button.classList.toggle("unset", !key);
-  $("key-mask").textContent = masked || "<未設定>";
+  $("key-mask").textContent = masked || t("key.maskUnset");
 }
 
 function openSettings() {
@@ -568,7 +966,7 @@ const CODE_TABS = {
 ${JSON.stringify(body, null, 2)}
 EOF`,
 
-  fetch: (body) => `// サーバ側（Node 等）で実行。ブラウザからの直接呼び出しは CORS で拒否される
+  fetch: (body) => `${t("code.fetchNote")}
 const body = ${JSON.stringify(body, null, 2)};
 
 const res = await fetch("${API_URL}", {
@@ -583,20 +981,19 @@ if (!res.ok) throw new Error(\`\${res.status}: \${await res.text()}\`);
 
 const { model, answers, usage } = await res.json();`,
 
-  "JS SDK": (body) => `// npm install @typesafe-ai/sdk   (Node.js 20+)
+  jsSdk: (body) => `${t("code.jsInstall")}
 import { TypeSafeClient } from "@typesafe-ai/sdk";
 
-const client = new TypeSafeClient(); // 環境変数 TYPESAFE_API_KEY を読む
+const client = new TypeSafeClient(); ${t("code.jsEnv")}
 const response = await client.systemOne(${JSON.stringify(body, null, 2)});
 
 console.log(response.answers, response.usage);
-// questions は choice(instructions, criteria) / score(...) / noul(...) ヘルパーでも書け、
-// 回答の型が質問から推論される`,
+${t("code.jsHelpers")}`,
 
-  "Python SDK": (body) => `# pip install typesafe-sdk   (Python 3.10+)
+  pySdk: (body) => `${t("code.pyInstall")}
 from typesafe_sdk import TypeSafeClient
 
-client = TypeSafeClient()  # 環境変数 TYPESAFE_API_KEY を読む
+client = TypeSafeClient()  ${t("code.pyEnv")}
 response = client.system_one(
     state=${pyLiteral(body.state, "    ")},
     questions=${pyLiteral(body.questions, "    ")},
@@ -604,19 +1001,19 @@ response = client.system_one(
 )
 
 print(response.answers, response.usage)
-# questions は Choice(...) / Score(...) / Noul(...) オブジェクトでも書ける`,
+${t("code.pyHelpers")}`,
 
-  "このデモ": () => `// ① ブラウザ (index.html) → ローカルプロキシ
+  demo: () => `${t("code.demoStep1")}
 const res = await fetch("/api/systemone", {
   method: "POST",
   headers: {
-    Authorization: \`Bearer \${apiKey}\`, // 「設定」で入力したキー (localStorage)
+    Authorization: \`Bearer \${apiKey}\`, ${t("code.demoKey")}
     "Content-Type": "application/json",
   },
-  body: editor.value, // 左の JSON をそのまま送る
+  body: editor.value, ${t("code.demoBody")}
 });
 
-// ② プロキシ (server.js) → TypeSafe API。Authorization はそのまま転送
+${t("code.demoStep2")}
 const upstream = await fetch("${API_URL}", {
   method: "POST",
   headers: {
@@ -625,7 +1022,7 @@ const upstream = await fetch("${API_URL}", {
   },
   body,
 });
-// ③ ステータスとボディは加工せずブラウザへ返す`,
+${t("code.demoStep3")}`,
 };
 
 let activeTab = "curl";
@@ -633,7 +1030,7 @@ let lastValidBody = SAMPLES[0].body;
 
 function renderCode() {
   $("code-tabs").innerHTML = Object.keys(CODE_TABS)
-    .map((name) => `<button type="button" role="tab" aria-selected="${name === activeTab}" data-tab="${esc(name)}">${esc(name)}</button>`)
+    .map((id) => `<button type="button" role="tab" aria-selected="${id === activeTab}" data-tab="${id}">${esc(t(`tab.${id}`))}</button>`)
     .join("");
   $("code").textContent = CODE_TABS[activeTab](lastValidBody);
 }
@@ -651,20 +1048,21 @@ const editor = $("editor");
 
 function validate() {
   const status = $("status");
+  let valid = true;
   try {
     const body = JSON.parse(editor.value);
     lastValidBody = body;
     const types = Object.values(body?.questions ?? {}).map((q) => q?.type ?? "?");
-    const counts = ["choice", "score", "noul"].map((t) => `${t} ${types.filter((x) => x === t).length}`).join(" / ");
+    const counts = ["choice", "score", "noul"].map((type) => `${type} ${types.filter((x) => x === type).length}`).join(" / ");
     status.className = "status";
-    status.textContent = `有効な JSON · questions ${types.length} 件（${counts}）`;
-    renderCode();
-    return true;
+    status.textContent = t("status.valid", { count: types.length, counts });
   } catch (err) {
     status.className = "status bad";
-    status.textContent = `JSON エラー: ${err.message}`;
-    return false;
+    status.textContent = t("status.error", { message: err.message });
+    valid = false;
   }
+  renderCode();
+  return valid;
 }
 
 function loadSample(index) {
@@ -672,25 +1070,32 @@ function loadSample(index) {
   validate();
 }
 
+function renderSamples() {
+  const select = $("sample");
+  const selected = select.value;
+  select.innerHTML = SAMPLES.map((s, i) => `<option value="${i}">${esc(s.label[lang])}</option>`).join("");
+  if (selected) select.value = selected;
+}
+
 const richText = (text) => esc(text).replace(/`([^`]+)`/g, "<code>$1</code>");
 
 function openGuide() {
-  const { label, guide } = SAMPLES[Number($("sample").value)];
+  const sample = SAMPLES[Number($("sample").value)];
+  const guide = sample.guide[lang];
   const list = (items) => `<ul>${items.map((item) => `<li>${richText(item)}</li>`).join("")}</ul>`;
   $("guide-body").innerHTML = `
-    <h2>${esc(label)}</h2>
-    <h3>想定している用途</h3><p>${richText(guide.purpose)}</p>
-    <h3>指定しているもの</h3>${list(guide.send)}
-    <h3>返ってくるもの</h3>${list(guide.returns)}
-    <h3>コード側での使い方</h3><p>${richText(guide.usage)}</p>
-    <p class="note">サンプルの出典: ${richText(guide.source)}</p>`;
+    <h2>${esc(sample.label[lang])}</h2>
+    <h3>${t("guide.purpose")}</h3><p>${richText(guide.purpose)}</p>
+    <h3>${t("guide.send")}</h3>${list(guide.send)}
+    <h3>${t("guide.returns")}</h3>${list(guide.returns)}
+    <h3>${t("guide.usage")}</h3><p>${richText(guide.usage)}</p>
+    <p class="note">${t("guide.source")}: ${richText(guide.source)}</p>`;
   $("guide").showModal();
 }
 
 $("open-guide").addEventListener("click", openGuide);
 $("guide").addEventListener("click", (e) => { if (e.target === $("guide")) $("guide").close(); });
 
-$("sample").innerHTML = SAMPLES.map((s, i) => `<option value="${i}">${esc(s.label)}</option>`).join("");
 $("sample").addEventListener("change", (e) => loadSample(Number(e.target.value)));
 $("format").addEventListener("click", () => {
   if (validate()) editor.value = JSON.stringify(lastValidBody, null, 2);
@@ -719,7 +1124,7 @@ function renderAnswer(id, a) {
   let detail = "";
   if (a.type === "noul") {
     value = a.noul.toFixed(2);
-    detail = bars([["yes", "yes である確率", a.noul]], "yes");
+    detail = bars([["yes", t("answer.noulYes"), a.noul]], "yes");
   } else if (a.type === "choice") {
     value = a.choice;
     detail = bars(Object.entries(a.probabilities).sort((x, y) => y[1] - x[1]).map(([k, p]) => [k, k, p]), a.choice);
@@ -730,7 +1135,7 @@ function renderAnswer(id, a) {
   } else {
     field = "";
   }
-  const confidence = a.confidence == null ? "" : `<div class="confidence">confidence <b>${a.confidence.toFixed(2)}</b> — この回答に基づいて自動処理してよいかの判断材料</div>`;
+  const confidence = a.confidence == null ? "" : `<div class="confidence">${t("answer.confidence", { value: a.confidence.toFixed(2) })}</div>`;
   return `
     <div class="answer ${esc(a.type)}">
       <div class="answer-head">
@@ -744,22 +1149,51 @@ function renderAnswer(id, a) {
 }
 
 const session = { ok: 0, failed: 0, inputTokens: 0, outputTokens: 0 };
+let lastCall = null;
+let lastResult = null;
 
 function renderMeter() {
-  $("m-requests").textContent = session.failed ? `${session.ok} (+失敗 ${session.failed})` : session.ok;
+  $("m-requests").textContent = session.failed ? t("meter.requestsValue", { ok: session.ok, failed: session.failed }) : session.ok;
   $("m-input").textContent = session.inputTokens.toLocaleString();
   $("m-output").textContent = session.outputTokens.toLocaleString();
   $("m-cost").textContent = usd(session.inputTokens);
 }
 
-function renderLastCall({ status, ok, roundTripMs, upstreamMs, requestId, usage }) {
+function renderLastCall() {
+  if (!lastCall) {
+    $("last-call").innerHTML = `<dt>${t("lastCall.label")}</dt><dd>${t("lastCall.none")}</dd>`;
+    return;
+  }
+  const { status, ok, roundTripMs, upstreamMs, requestId, usage } = lastCall;
   const rows = [
-    ["直近の呼び出し", `<span class="${ok ? "ok" : "ng"}">HTTP ${status}</span>`],
-    ["所要時間", `${roundTripMs} ms（うち TypeSafe API ${esc(upstreamMs ?? "—")} ms）`],
-    ["request id", esc(requestId || "—")],
+    [t("lastCall.label"), `<span class="${ok ? "ok" : "ng"}">HTTP ${status}</span>`],
+    [t("lastCall.duration"), t("lastCall.durationValue", { ms: roundTripMs, upstream: esc(upstreamMs ?? "—") })],
+    [t("lastCall.requestId"), esc(requestId || "—")],
   ];
-  if (usage) rows.push(["usage", `input ${usage.input_tokens} / output ${usage.output_tokens} tokens → ${usd(usage.input_tokens)}`]);
+  if (usage) {
+    rows.push([t("lastCall.usage"), t("lastCall.usageValue", {
+      input: usage.input_tokens, output: usage.output_tokens, cost: usd(usage.input_tokens),
+    })]);
+  }
   $("last-call").innerHTML = rows.map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join("");
+}
+
+function renderResult() {
+  const el = $("result");
+  if (!lastResult) {
+    el.innerHTML = `<div class="placeholder">${t("result.placeholder")}</div>`;
+    return;
+  }
+  if (lastResult.error != null) {
+    el.innerHTML = `<div class="error-box">${t("result.fetchFailed", { message: esc(lastResult.error) })}</div>`;
+    return;
+  }
+  const { ok, status, data } = lastResult;
+  const cards = ok
+    ? Object.entries(data.answers).map(([id, a]) => renderAnswer(id, a)).join("")
+    : `<div class="error-box">${t("result.httpError", { status })}</div>`;
+  const raw = typeof data === "string" ? esc(data) : highlightJson(data);
+  el.innerHTML = `${cards}<h2>${t("result.rawHeading")}</h2><pre>${raw}</pre>`;
 }
 
 async function run() {
@@ -788,19 +1222,19 @@ async function run() {
       session.failed += 1;
     }
     renderMeter();
-    renderLastCall({
+
+    lastCall = {
       status: res.status, ok: res.ok, roundTripMs, usage,
       upstreamMs: res.headers.get("X-Upstream-Ms"),
       requestId: res.headers.get("X-Typesafe-Request-Id"),
-    });
+    };
+    renderLastCall();
 
-    const cards = res.ok
-      ? Object.entries(data.answers).map(([id, a]) => renderAnswer(id, a)).join("")
-      : `<div class="error-box">HTTP ${res.status} — API がエラーを返しました。下のボディに原因が入っています。</div>`;
-    const raw = typeof data === "string" ? esc(data) : highlightJson(data);
-    $("result").innerHTML = `${cards}<h2>レスポンスボディ（生 JSON）</h2><pre>${raw}</pre>`;
+    lastResult = { ok: res.ok, status: res.status, data };
+    renderResult();
   } catch (err) {
-    $("result").innerHTML = `<div class="error-box">呼び出しに失敗しました（server.js は起動していますか？）:${esc(err.message)}</div>`;
+    lastResult = { error: err.message };
+    renderResult();
   } finally {
     button.disabled = false;
   }
@@ -810,29 +1244,78 @@ $("run").addEventListener("click", run);
 
 // ---------- モデル一覧 ----------
 
-async function loadModels() {
+let modelsState = { kind: "loading" };
+
+function renderModels() {
   const el = $("models");
-  if (!getKey()) { el.textContent = "API キーを設定すると、利用可能なモデルを取得して表示します。"; return; }
-  el.textContent = "読み込み中…";
+  if (modelsState.kind === "nokey") { el.textContent = t("models.noKey"); return; }
+  if (modelsState.kind === "loading") { el.textContent = t("models.loading"); return; }
+  if (modelsState.kind === "http") {
+    el.innerHTML = `<span class="ng">${t("models.failedHttp", { status: modelsState.status })}</span> ${modelsState.detail}`;
+    return;
+  }
+  if (modelsState.kind === "error") {
+    el.innerHTML = `<span class="ng">${t("models.failed")}</span> ${modelsState.detail}`;
+    return;
+  }
+  el.innerHTML = `<table><tr><th>${t("models.thName")}</th><th>${t("models.thRelease")}</th><th>${t("models.thDescription")}</th></tr>${modelsState.models
+    .map((m) => `<tr><td class="mono">${esc(m.name)}</td><td class="mono">${esc(m.release_date)}</td><td>${esc(m.description)}</td></tr>`)
+    .join("")}</table>`;
+}
+
+async function loadModels() {
+  if (!getKey()) { modelsState = { kind: "nokey" }; renderModels(); return; }
+  modelsState = { kind: "loading" };
+  renderModels();
   try {
     const res = await fetch("/api/models", { headers: authHeaders() });
     const data = await res.json();
-    if (!res.ok) {
-      el.innerHTML = `<span class="ng">取得失敗 (HTTP ${res.status})</span> ${esc(data.error ?? data.detail?.message ?? JSON.stringify(data))}`;
-      return;
-    }
-    el.innerHTML = `<table><tr><th>name</th><th>release_date</th><th>description</th></tr>${data.models
-      .map((m) => `<tr><td class="mono">${esc(m.name)}</td><td class="mono">${esc(m.release_date)}</td><td>${esc(m.description)}</td></tr>`)
-      .join("")}</table>`;
+    modelsState = res.ok
+      ? { kind: "ok", models: data.models }
+      : { kind: "http", status: res.status, detail: esc(data.error ?? data.detail?.message ?? JSON.stringify(data)) };
+    renderModels();
   } catch (err) {
-    el.innerHTML = `<span class="ng">取得失敗</span> ${esc(err.message)}`;
+    modelsState = { kind: "error", detail: esc(err.message) };
+    renderModels();
   }
 }
 
-$("schema").innerHTML = SCHEMA;
+// ---------- 言語の適用 ----------
+
+function renderSchema() {
+  $("schema").innerHTML = t("schema");
+}
+
+function applyLanguage() {
+  document.documentElement.lang = lang;
+  document.querySelectorAll("[data-i18n]").forEach((el) => {
+    el.innerHTML = t(el.dataset.i18n);
+  });
+  document.querySelectorAll("[data-i18n-attr]").forEach((el) => {
+    for (const pair of el.dataset.i18nAttr.split(",")) {
+      const [attr, key] = pair.split(":");
+      el.setAttribute(attr, t(key));
+    }
+  });
+  $("lang-toggle").textContent = t("lang.toggle");
+  renderSamples();
+  renderKeyState();
+  validate();
+  renderSchema();
+  renderMeter();
+  renderLastCall();
+  renderResult();
+  renderModels();
+}
+
+$("lang-toggle").addEventListener("click", () => {
+  lang = lang === "ja" ? "en" : "ja";
+  localStorage.setItem("lang", lang);
+  applyLanguage();
+});
+
 loadSample(0);
-renderMeter();
-renderKeyState();
+applyLanguage();
 loadModels();
 </script>
 </body>
