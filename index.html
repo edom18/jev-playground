@@ -771,21 +771,21 @@ const SAMPLES = [
       ja: {
         purpose: "質問ごとに違う参照データと照合したいとき（重複レコードの判定など）に使います。評価対象は state に、比較相手は質問側に持たせます。",
         send: [
-          "`state`: 評価対象の履歴書",
+          "`state`: 評価対象の履歴書。`state` はどのリクエストでも必須で、`instructions` にデータを入れても `state` の代わりにはならない（追加で持たせるもの）",
           "`instructions`: 文字列ではなくオブジェクト。`question` フィールドに問いを、`potential_duplicate` フィールドに比較相手のデータを入れ、問いの中からバッククォートで参照する",
         ],
         returns: ["`is_duplicate.noul`: 同一人物である確率"],
-        usage: "候補が複数あるなら、候補ごとに質問を 1 つずつ作って 1 リクエストにまとめ、noul が最大の候補を採用する、といった使い方ができます。`criteria` の各値も同じようにオブジェクトや配列で書けます。",
+        usage: "全質問に共通する材料は `state` に、その質問だけに必要な材料は `instructions` に入れる、という使い分けです。比較相手が 1 人だけなら `state` に入れても動きますが、候補が複数あるなら候補ごとに質問を 1 つずつ作って 1 リクエストにまとめ、noul が最大の候補を採用できます。候補を全部 `state` に入れると、どの質問からも全候補が見えてしまい「この質問はこの候補だけを見る」という切り分けができません。",
         source: "instructions は API reference の例そのまま、state（履歴書）はこのデモ用に作成",
       },
       en: {
         purpose: "For matching against different reference data per question, such as spotting duplicate records. The subject being evaluated goes in the state, the thing to compare it against goes on the question.",
         send: [
-          "`state`: the resume being evaluated",
+          "`state`: the resume being evaluated. `state` is required in every request; data placed in `instructions` does not replace it, it is added on top of it",
           "`instructions`: an object instead of a string. Put the question in the `question` field and the comparison data in the `potential_duplicate` field, then reference it from the question with backquotes",
         ],
         returns: ["`is_duplicate.noul`: the probability that this is the same person"],
-        usage: "With several candidates, write one question per candidate, send them in a single request, and take the candidate with the highest noul. Each value in `criteria` can be an object or an array in the same way.",
+        usage: "The rule of thumb: material shared by every question goes in `state`, material only one question needs goes in its `instructions`. With a single candidate you could put it in `state` and it would still work, but with several candidates you write one question per candidate, send them in a single request, and take the candidate with the highest noul. If all candidates were in `state`, every question would see all of them and you could not make a question look at just one.",
         source: "The instructions are taken as-is from the API reference example; the state (the resume) was written for this demo",
       },
     },
@@ -807,6 +807,186 @@ const SAMPLES = [
           instructions: {
             potential_duplicate: { name: "John Smith", location: "Oakland, California", last_employer: "Google" },
             question: "Is the resume for the same person as `potential_duplicate`?",
+          },
+        },
+      },
+    },
+  },
+  {
+    label: {
+      ja: "構造化 criteria（Choice）— 選択肢の境界を what / not_for / examples で明確化",
+      en: "Structured criteria (Choice) — sharpen option boundaries with what / not_for / examples",
+    },
+    guide: {
+      ja: {
+        purpose: "選択肢どうしの境界が紛らわしい分類で、誤った振り分けを減らすための書き方です。`criteria` は「どんな答えがありうるか」を定義する部分で、その説明を文字列ではなくオブジェクトで書きます。",
+        send: [
+          "`state`: 配送の遅れと請求の両方に触れている、紛らわしい問い合わせ",
+          "`criteria`: 「選択肢名: 説明」のマップという形は同じ。説明の値をオブジェクトにし、`what`（扱うもの）・`not_for`（扱わないもの）・`examples`（例文）を並べている。これらのキー名は決まりではなく自由に付けられる",
+          "`instructions` もオブジェクトにして、`focus` で「触れられた話題すべてではなく主な要件で分類する」と補足している",
+        ],
+        returns: ["`department.choice`・`probabilities`・`confidence`（文字列の criteria のときと形は同じ。返る選択肢名はマップのキー）"],
+        usage: "まず文字列の説明で試し、取り違えが多い選択肢が見つかったら `not_for` や例を足して境界をはっきりさせる、という順で調整します。プロンプト全体を書き直すのではなく、問題のある選択肢の説明だけを直せます。",
+        source: "Advanced: structure の例そのまま",
+      },
+      en: {
+        purpose: "A way to reduce misrouting when the boundaries between options are easy to confuse. `criteria` is the part that defines which answers are possible, and here each description is an object instead of a string.",
+        send: [
+          "`state`: a confusing message that touches on both a late delivery and a charge",
+          "`criteria`: still a map of option name to description. Each description is an object listing `what` (what it covers), `not_for` (what it does not cover) and `examples`. These key names are not fixed; you can name them freely",
+          "`instructions` is an object too, with `focus` adding that the primary request should be classified, not every topic mentioned",
+        ],
+        returns: ["`department.choice`, `probabilities` and `confidence` (the same shape as with string criteria; the returned option names are the map keys)"],
+        usage: "Start with string descriptions, and when you find options that get mixed up, add `not_for` and examples to sharpen the boundary. You fix only the description of the problematic option instead of rewriting a whole prompt.",
+        source: "Taken as-is from the Advanced: structure example",
+      },
+    },
+    body: {
+      state: "I ordered the standing desk two weeks ago and tracking still says label created. Was I even charged?",
+      model: "jev-latest",
+      questions: {
+        department: {
+          type: "choice",
+          instructions: {
+            question: "Which team should handle this message?",
+            focus: "Classify the customer's primary request, not every topic mentioned.",
+          },
+          criteria: {
+            billing: {
+              what: "Charges, invoices, refunds, or subscriptions",
+              not_for: "Order tracking or account access",
+              examples: ["I was charged twice", "Where is my refund?"],
+            },
+            orders: {
+              what: "Order status, delivery, cancellation, or returns",
+              not_for: "Charges or account access",
+              examples: ["Where is my package?", "Cancel my order"],
+            },
+            account: {
+              what: "Login, password, profile, or security",
+              not_for: "Charges or delivery",
+              examples: ["I can't log in", "Change my email"],
+            },
+          },
+        },
+      },
+    },
+  },
+  {
+    label: {
+      ja: "構造化 criteria（Score）— 各段階を summary と signals で定義",
+      en: "Structured criteria (Score) — define each level with a summary and signals",
+    },
+    guide: {
+      ja: {
+        purpose: "段階の違いを一言では言い表しにくい採点で、各段階に「見分けるための手がかり」を持たせる書き方です。例はプルリクエストの説明文が 1 つの変更に集中しているかの採点です。",
+        send: [
+          "`state`: 複数の変更を混ぜたプルリクエストの説明文",
+          "`criteria`: 低い順に並べた配列という形は同じ。各要素を文字列ではなくオブジェクトにし、`summary`（その段階の要約）と `signals`（当てはまるときの特徴）を書いている。キー名は自由",
+          "`instructions` の `note` で「変更の大きさではなく、独立した変更の数で判断する」と基準を補足している",
+        ],
+        returns: [
+          "`pr_scope.score`: 0〜2 の位置（確率加重なので小数になりうる）",
+          "`legend`・`probabilities`・`confidence`（形は文字列の criteria のときと同じ）",
+        ],
+        usage: "スコアがしきい値を超えたら「PR を分割してください」と自動コメントする、といった使い方ができます。段階の判定がぶれるときは、`signals` に具体的な特徴を足して調整します。",
+        source: "Advanced: structure の例そのまま",
+      },
+      en: {
+        purpose: "For grading where the difference between levels is hard to say in a few words: each level carries the cues that identify it. The example grades whether a pull request description is focused on a single change.",
+        send: [
+          "`state`: a pull request description that mixes several changes",
+          "`criteria`: still an array ordered from low to high. Each entry is an object instead of a string, with `summary` (what the level means) and `signals` (what you see when it applies). The key names are up to you",
+          "The `note` in `instructions` adds the yardstick: judge the number of independent changes, not the size of any one change",
+        ],
+        returns: [
+          "`pr_scope.score`: a position from 0 to 2 (probability-weighted, so it can be fractional)",
+          "`legend`, `probabilities` and `confidence` (the same shape as with string criteria)",
+        ],
+        usage: "For example, post an automatic \"please split this PR\" comment when the score crosses a threshold. When the grading of a level wobbles, add concrete cues to its `signals`.",
+        source: "Taken as-is from the Advanced: structure example",
+      },
+    },
+    body: {
+      state: "Fixed the null check in the payment handler. Also refactored the retry loop while I was in there, and bumped the SDK version since the old one had that timeout bug.",
+      model: "jev-latest",
+      questions: {
+        pr_scope: {
+          type: "score",
+          instructions: {
+            question: "How focused is this pull request description on a single change?",
+            note: "Judge the number of independent changes, not the size of any one change.",
+          },
+          criteria: [
+            {
+              summary: "One change, clearly stated",
+              signals: ["A single fix or feature", "Nothing described as \"also\" or \"while I was in there\""],
+            },
+            {
+              summary: "One main change plus a small related tweak",
+              signals: ["A primary change and one minor adjacent edit", "The tweak supports the main change"],
+            },
+            {
+              summary: "Several independent changes bundled together",
+              signals: ["Two or more unrelated fixes or features", "Changes that could each be their own PR"],
+            },
+          ],
+        },
+      },
+    },
+  },
+  {
+    label: {
+      ja: "構造化 criteria（Noul）— はい/いいえの境界を定義と例で固定",
+      en: "Structured criteria (Noul) — pin down the yes/no boundary with definitions and examples",
+    },
+    guide: {
+      ja: {
+        purpose: "はい/いいえの境界が微妙な判定（ここではフィッシングの検出）で、どこからが「はい」かを定義と例で固定する書き方です。",
+        send: [
+          "`state`: 送信者情報（`sender`）と本文（`message`）を持つオブジェクト",
+          "`instructions`: `question` に問い、`inspect` に見るべきフィールド、`focus` に「変更や再設定の依頼ではなく、認証情報そのものを送らせる依頼を探す」という着眼点",
+          "`criteria`: Noul では任意。`true` と `false` のそれぞれに、`what`（定義）と `examples`（例）を持つオブジェクトを書いている",
+        ],
+        returns: ["`requests_credentials.noul`: 認証情報の開示を求めている確率（0〜1）。Noul に `confidence` は無い"],
+        usage: "「パスワードをリセットしてください」（いいえ）と「パスワードを返信してください」（はい）のように紛らわしい両側の例を書いておくと、確率が 0.5 付近に集まりにくくなります。しきい値を超えたら隔離する、といった分岐に使います。",
+        source: "Advanced: structure の例そのまま",
+      },
+      en: {
+        purpose: "For a judgment where the yes/no boundary is subtle (here, phishing detection): definitions and examples fix where \"yes\" begins.",
+        send: [
+          "`state`: an object with the sender details (`sender`) and the text (`message`)",
+          "`instructions`: the question in `question`, the field to look at in `inspect`, and in `focus` the angle to take: look for a request to send the credential itself, not a request to change or reset it",
+          "`criteria`: optional for a Noul. Here `true` and `false` each hold an object with `what` (the definition) and `examples`",
+        ],
+        returns: ["`requests_credentials.noul`: the probability that a credential is being requested (0 to 1). A Noul has no `confidence`"],
+        usage: "Writing confusable examples on both sides, such as \"reset your password\" (no) versus \"reply with your password\" (yes), keeps the probability from clustering around 0.5. Use it for branches such as quarantining the message above a threshold.",
+        source: "Taken as-is from the Advanced: structure example",
+      },
+    },
+    body: {
+      state: {
+        sender: { display_name: "Beaver Dam Builders Ltd.", email: "donotreply@payroll.example" },
+        message: "Your Q3 bonus is ready. Reply with your login password so we can verify your identity and release the funds.",
+      },
+      model: "jev-latest",
+      questions: {
+        requests_credentials: {
+          type: "noul",
+          instructions: {
+            question: "Does the `message` ask the recipient to disclose a sensitive credential?",
+            inspect: "message",
+            focus: "Look for a request to send the credential itself, not a request to change or reset it.",
+          },
+          criteria: {
+            true: {
+              what: "Asks the recipient to reply with, type, or send a password, PIN, one-time code, or other security sensitive answer",
+              examples: ["Reply with your password", "Send us the 6-digit code you just received"],
+            },
+            false: {
+              what: "No sensitive credential is requested",
+              examples: ["Reset your password from the settings page", "Your statement is ready"],
+            },
           },
         },
       },
@@ -1131,7 +1311,9 @@ function renderAnswer(id, a) {
   } else if (a.type === "score") {
     value = a.score.toFixed(2);
     const top = Object.entries(a.probabilities).sort((x, y) => y[1] - x[1])[0][0];
-    detail = bars(Object.entries(a.probabilities).map(([k, p]) => [k, `${k}: ${a.legend?.[k] ?? ""}`, p]), top);
+    // With structured criteria a legend entry is the level's object, not a string.
+    const levelText = (k) => (typeof a.legend?.[k] === "string" ? a.legend[k] : JSON.stringify(a.legend?.[k] ?? ""));
+    detail = bars(Object.entries(a.probabilities).map(([k, p]) => [k, `${k}: ${levelText(k)}`, p]), top);
   } else {
     field = "";
   }

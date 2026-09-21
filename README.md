@@ -90,9 +90,9 @@ TypeSafe's documentation has no cost or billing API, so the cost in the header i
 
 ## Samples
 
-Support ticket (all three types in one call), Noul with criteria, Choice with `null` descriptions, Score, structured `state`, structured `instructions`, Japanese text, and an intentionally invalid request to see a 422. Some are taken verbatim from the TypeSafe docs and some were written for this demo; the explain dialog states the source of each. Samples live in the `SAMPLES` array in `index.html`.
+Support ticket (all three types in one call), Noul with criteria, Choice with `null` descriptions, Score, structured `state`, structured `instructions`, structured `criteria` for each of the three types, Japanese text, and an intentionally invalid request to see a 422. Some are taken verbatim from the TypeSafe docs and some were written for this demo; the explain dialog states the source of each. Samples live in the `SAMPLES` array in `index.html`.
 
-Not covered yet: array `state`, structured `criteria`, and the multi-step patterns and cookbooks from the docs (fan-out, confidence routing, composite scoring, re-ranking, guardrails, and so on).
+Not covered yet: array `state`, and the multi-step patterns and cookbooks from the docs (fan-out, confidence routing, composite scoring, re-ranking, guardrails, and so on).
 
 ## Files
 
